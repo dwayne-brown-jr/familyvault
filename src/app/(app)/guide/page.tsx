@@ -23,7 +23,7 @@ export default function GuidePage() {
     <div className="space-y-8 max-w-4xl mx-auto">
       {/* Hero */}
       <div>
-        <h1 className="text-2xl font-bold text-foreground">
+        <h1 className="text-3xl font-bold tracking-tight text-gradient">
           Welcome to FamilyVault
         </h1>
         <p className="text-muted-foreground text-sm mt-1">
@@ -32,11 +32,15 @@ export default function GuidePage() {
       </div>
 
       {/* Why this exists */}
-      <Card>
+      <Card className="glow-accent">
         <div className="flex items-start gap-4">
-          <Heart className="w-6 h-6 text-coral shrink-0 mt-1" />
+          <div className="w-9 h-9 rounded-full accent-soft flex items-center justify-center shrink-0">
+            <Heart className="w-5 h-5 text-coral" />
+          </div>
           <div>
-            <CardTitle className="text-lg">Why We Built This</CardTitle>
+            <CardTitle className="text-base text-foreground font-semibold">
+              Why We Built This
+            </CardTitle>
             <div className="mt-3 space-y-3 text-sm text-foreground/80 leading-relaxed">
               <p>
                 When Rupert Murdoch had a medical emergency in 2018, even his
@@ -64,15 +68,19 @@ export default function GuidePage() {
       {/* What's inside */}
       <div>
         <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-navy" />
+          <div className="w-9 h-9 rounded-full accent-soft flex items-center justify-center">
+            <BookOpen className="w-5 h-5 text-teal" />
+          </div>
           What&apos;s Inside
         </h2>
 
         <div className="space-y-4">
           {/* Emergency Binder */}
-          <Card>
+          <Card className="card-hover">
             <div className="flex items-start gap-3">
-              <FolderLock className="w-5 h-5 text-navy shrink-0 mt-0.5" />
+              <div className="w-9 h-9 rounded-full accent-soft flex items-center justify-center shrink-0">
+                <FolderLock className="w-5 h-5 text-navy" />
+              </div>
               <div>
                 <p className="font-semibold text-foreground">
                   Emergency Binder
@@ -155,9 +163,11 @@ export default function GuidePage() {
           </Card>
 
           {/* Action Plan */}
-          <Card>
+          <Card className="card-hover">
             <div className="flex items-start gap-3">
-              <ListChecks className="w-5 h-5 text-teal shrink-0 mt-0.5" />
+              <div className="w-9 h-9 rounded-full accent-soft flex items-center justify-center shrink-0">
+                <ListChecks className="w-5 h-5 text-teal" />
+              </div>
               <div>
                 <p className="font-semibold text-foreground">Action Plan</p>
                 <p className="text-sm text-foreground/70 mt-1 leading-relaxed">
@@ -172,9 +182,11 @@ export default function GuidePage() {
           </Card>
 
           {/* Insurance Gap */}
-          <Card>
+          <Card className="card-hover">
             <div className="flex items-start gap-3">
-              <ShieldCheck className="w-5 h-5 text-coral shrink-0 mt-0.5" />
+              <div className="w-9 h-9 rounded-full accent-soft flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-5 h-5 text-coral" />
+              </div>
               <div>
                 <p className="font-semibold text-foreground">
                   Insurance Gap Analysis
@@ -190,9 +202,11 @@ export default function GuidePage() {
           </Card>
 
           {/* 529 Calculator */}
-          <Card>
+          <Card className="card-hover">
             <div className="flex items-start gap-3">
-              <GraduationCap className="w-5 h-5 text-navy-light shrink-0 mt-0.5" />
+              <div className="w-9 h-9 rounded-full accent-soft flex items-center justify-center shrink-0">
+                <GraduationCap className="w-5 h-5 text-navy-light" />
+              </div>
               <div>
                 <p className="font-semibold text-foreground">529 Calculator</p>
                 <p className="text-sm text-foreground/70 mt-1 leading-relaxed">
@@ -209,33 +223,57 @@ export default function GuidePage() {
       {/* How to use it */}
       <Card>
         <div className="flex items-start gap-4">
-          <Clock className="w-6 h-6 text-teal shrink-0 mt-1" />
-          <div>
-            <CardTitle className="text-lg">How to Use It</CardTitle>
-            <div className="mt-3 space-y-3 text-sm text-foreground/80 leading-relaxed">
+          <div className="w-9 h-9 rounded-full accent-soft flex items-center justify-center shrink-0">
+            <Clock className="w-5 h-5 text-teal" />
+          </div>
+          <div className="flex-1">
+            <CardTitle className="text-base text-foreground font-semibold">
+              How to Use It
+            </CardTitle>
+            <div className="mt-3 space-y-4 text-sm text-foreground/80 leading-relaxed">
               <p>
                 You don&apos;t need to fill everything out at once. Here&apos;s
                 a simple approach:
               </p>
-              <ol className="list-decimal list-inside space-y-2 pl-1">
-                <li>
-                  <strong>Start with Contacts</strong> &mdash; Add our key
-                  people (attorney, insurance agent, financial advisor). This
-                  takes 5 minutes.
+              <ol className="space-y-3">
+                <li className="flex items-start gap-3">
+                  <span className="w-9 h-9 rounded-full accent-soft flex items-center justify-center font-semibold text-teal shrink-0 text-sm">
+                    1
+                  </span>
+                  <span className="mt-1.5">
+                    <strong>Start with Contacts</strong> &mdash; Add our key
+                    people (attorney, insurance agent, financial advisor). This
+                    takes 5 minutes.
+                  </span>
                 </li>
-                <li>
-                  <strong>Check the Action Plan</strong> &mdash; See what steps
-                  we&apos;ve completed and what&apos;s next. Pick one thing to
-                  work on together.
+                <li className="flex items-start gap-3">
+                  <span className="w-9 h-9 rounded-full accent-soft flex items-center justify-center font-semibold text-teal shrink-0 text-sm">
+                    2
+                  </span>
+                  <span className="mt-1.5">
+                    <strong>Check the Action Plan</strong> &mdash; See what steps
+                    we&apos;ve completed and what&apos;s next. Pick one thing to
+                    work on together.
+                  </span>
                 </li>
-                <li>
-                  <strong>Fill in over time</strong> &mdash; Add accounts,
-                  policies, and bills as you come across them. There&apos;s no
-                  rush.
+                <li className="flex items-start gap-3">
+                  <span className="w-9 h-9 rounded-full accent-soft flex items-center justify-center font-semibold text-teal shrink-0 text-sm">
+                    3
+                  </span>
+                  <span className="mt-1.5">
+                    <strong>Fill in over time</strong> &mdash; Add accounts,
+                    policies, and bills as you come across them. There&apos;s no
+                    rush.
+                  </span>
                 </li>
-                <li>
-                  <strong>Review together quarterly</strong> &mdash; Set a
-                  reminder to review and update everything every few months.
+                <li className="flex items-start gap-3">
+                  <span className="w-9 h-9 rounded-full accent-soft flex items-center justify-center font-semibold text-teal shrink-0 text-sm">
+                    4
+                  </span>
+                  <span className="mt-1.5">
+                    <strong>Review together quarterly</strong> &mdash; Set a
+                    reminder to review and update everything every few months.
+                  </span>
                 </li>
               </ol>
               <p>
@@ -250,7 +288,9 @@ export default function GuidePage() {
       {/* Important note */}
       <Card className="border-l-4 border-l-amber">
         <div className="flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-amber shrink-0 mt-0.5" />
+          <div className="w-9 h-9 rounded-full accent-soft flex items-center justify-center shrink-0">
+            <AlertTriangle className="w-5 h-5 text-amber" />
+          </div>
           <div>
             <p className="font-semibold text-foreground text-sm">
               This app is not a replacement for professional advice
@@ -269,7 +309,9 @@ export default function GuidePage() {
       {/* Download resources */}
       <div>
         <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-          <FileDown className="w-5 h-5 text-navy" />
+          <div className="w-9 h-9 rounded-full accent-soft flex items-center justify-center">
+            <FileDown className="w-5 h-5 text-teal" />
+          </div>
           Downloadable Resources
         </h2>
         <p className="text-sm text-foreground/70 mb-4">
@@ -280,11 +322,13 @@ export default function GuidePage() {
           <a
             href="/Family-Emergency-Binder-Template.pdf"
             download
-            className="flex items-start gap-3 bg-card border border-border rounded-xl p-4 hover:bg-surface-hover transition group"
+            className="glass card-hover rounded-2xl p-5 flex items-start gap-3 group"
           >
-            <FileDown className="w-5 h-5 text-navy shrink-0 mt-0.5" />
+            <div className="w-9 h-9 rounded-full accent-soft flex items-center justify-center shrink-0">
+              <FileDown className="w-5 h-5 text-navy" />
+            </div>
             <div>
-              <p className="text-sm font-semibold text-foreground group-hover:text-navy transition">
+              <p className="text-sm font-semibold text-foreground group-hover:text-teal transition">
                 Family Emergency Binder Template
               </p>
               <p className="text-xs text-muted-foreground mt-1">
@@ -296,11 +340,13 @@ export default function GuidePage() {
           <a
             href="/Family-Legacy-Playbook.pdf"
             download
-            className="flex items-start gap-3 bg-card border border-border rounded-xl p-4 hover:bg-surface-hover transition group"
+            className="glass card-hover rounded-2xl p-5 flex items-start gap-3 group"
           >
-            <FileDown className="w-5 h-5 text-navy shrink-0 mt-0.5" />
+            <div className="w-9 h-9 rounded-full accent-soft flex items-center justify-center shrink-0">
+              <FileDown className="w-5 h-5 text-navy" />
+            </div>
             <div>
-              <p className="text-sm font-semibold text-foreground group-hover:text-navy transition">
+              <p className="text-sm font-semibold text-foreground group-hover:text-teal transition">
                 Family Legacy Playbook
               </p>
               <p className="text-xs text-muted-foreground mt-1">

@@ -72,11 +72,11 @@ export default function AssistantPage() {
     <div className="flex flex-col h-[calc(100vh-4rem)] lg:h-screen max-w-3xl mx-auto w-full">
       {/* Header */}
       <div className="px-4 lg:px-6 py-4 border-b border-border flex items-center gap-3">
-        <div className="w-9 h-9 rounded-lg bg-teal/15 flex items-center justify-center">
+        <div className="w-9 h-9 rounded-xl accent-soft glow-accent flex items-center justify-center">
           <Sparkles className="w-5 h-5 text-teal" />
         </div>
         <div>
-          <h1 className="font-bold text-foreground leading-tight">Vault Assistant</h1>
+          <h1 className="font-bold text-foreground leading-tight tracking-tight">Vault Assistant</h1>
           <p className="text-xs text-muted-foreground">
             Grounded in your family&apos;s vault
           </p>
@@ -87,8 +87,8 @@ export default function AssistantPage() {
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 lg:px-6 py-6 space-y-5">
         {messages.length === 0 && (
           <div className="text-center mt-10 space-y-6">
-            <div className="inline-flex w-14 h-14 rounded-2xl bg-navy/10 items-center justify-center">
-              <Shield className="w-7 h-7 text-navy" />
+            <div className="inline-flex w-14 h-14 rounded-2xl accent-soft glow-accent items-center justify-center">
+              <Shield className="w-7 h-7 text-teal" />
             </div>
             <div>
               <h2 className="text-lg font-semibold text-foreground">
@@ -104,7 +104,7 @@ export default function AssistantPage() {
                 <button
                   key={s}
                   onClick={() => sendMessage(s)}
-                  className="text-sm px-3 py-2 rounded-lg border border-border bg-card hover:bg-background text-foreground transition"
+                  className="text-sm px-3 py-2 rounded-xl glass card-hover text-foreground transition"
                 >
                   {s}
                 </button>
@@ -121,8 +121,8 @@ export default function AssistantPage() {
             <div
               className={
                 m.role === "user"
-                  ? "max-w-[85%] rounded-2xl rounded-br-sm bg-primary text-white px-4 py-2.5 text-sm whitespace-pre-wrap"
-                  : "max-w-[90%] rounded-2xl rounded-bl-sm bg-card border border-border text-foreground px-4 py-2.5 text-sm whitespace-pre-wrap"
+                  ? "max-w-[85%] rounded-2xl rounded-br-sm bg-teal text-[#08090D] font-medium px-4 py-2.5 text-sm whitespace-pre-wrap shadow-[0_4px_20px_-6px_rgba(46,230,197,0.5)]"
+                  : "max-w-[90%] rounded-2xl rounded-bl-sm glass text-foreground px-4 py-2.5 text-sm whitespace-pre-wrap"
               }
             >
               {m.content || (loading && i === messages.length - 1 ? "Thinking…" : "")}
@@ -151,12 +151,12 @@ export default function AssistantPage() {
             }}
             rows={1}
             placeholder="Ask about your accounts, insurance, documents…"
-            className="flex-1 resize-none px-3 py-2.5 bg-background border border-border rounded-lg text-foreground placeholder:text-muted text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent max-h-32"
+            className="flex-1 resize-none px-3 py-2.5 bg-white/[0.04] border border-border rounded-xl text-foreground placeholder:text-muted text-sm focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent max-h-32"
           />
           <button
             type="submit"
             disabled={loading || !input.trim()}
-            className="p-2.5 bg-primary text-white rounded-lg hover:bg-primary-hover transition disabled:opacity-40 shrink-0"
+            className="p-2.5 bg-teal text-[#08090D] rounded-xl hover:bg-teal-light transition disabled:opacity-40 shrink-0 glow-accent"
             aria-label="Send"
           >
             <Send className="w-5 h-5" />

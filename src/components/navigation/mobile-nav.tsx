@@ -23,7 +23,10 @@ export function MobileNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)' }}>
+    <nav
+      className="lg:hidden fixed bottom-0 left-0 right-0 glass-nav border-t border-border z-50"
+      style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)" }}
+    >
       <div className="flex items-center justify-around pt-2 px-1">
         {mobileNavItems.map((item) => {
           const isActive =
@@ -33,13 +36,20 @@ export function MobileNav() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition min-w-[56px]",
+                "flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-medium transition min-w-[56px]",
                 isActive
-                  ? "text-navy"
+                  ? "text-teal"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <item.icon className={cn("w-5 h-5", isActive && "text-navy")} />
+              <span
+                className={cn(
+                  "flex items-center justify-center w-9 h-7 rounded-lg transition",
+                  isActive && "accent-soft glow-accent"
+                )}
+              >
+                <item.icon className="w-5 h-5" />
+              </span>
               {item.label}
             </Link>
           );

@@ -42,11 +42,13 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 bg-sidebar text-white min-h-screen">
+    <aside className="hidden lg:flex flex-col w-64 shrink-0 glass-nav border-r border-border min-h-screen sticky top-0 h-screen">
       {/* Logo */}
-      <div className="flex items-center gap-2 px-6 py-5 border-b border-white/10">
-        <Shield className="w-7 h-7 text-teal" />
-        <span className="text-lg font-bold">FamilyVault</span>
+      <div className="flex items-center gap-2.5 px-6 py-5 border-b border-border">
+        <div className="relative flex items-center justify-center w-9 h-9 rounded-xl accent-soft glow-accent">
+          <Shield className="w-5 h-5 text-teal" />
+        </div>
+        <span className="text-lg font-bold tracking-tight text-gradient">FamilyVault</span>
       </div>
 
       {/* Nav */}
@@ -59,10 +61,10 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition",
+                "relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
                 isActive
-                  ? "bg-white/15 text-white"
-                  : "text-white/60 hover:bg-white/10 hover:text-white"
+                  ? "accent-soft text-teal glow-accent"
+                  : "text-muted-foreground hover:bg-white/[0.04] hover:text-foreground"
               )}
             >
               <item.icon className="w-5 h-5 shrink-0" />
@@ -73,17 +75,17 @@ export function Sidebar() {
       </nav>
 
       {/* Bottom */}
-      <div className="px-3 py-4 border-t border-white/10 space-y-1">
+      <div className="px-3 py-4 border-t border-border space-y-1">
         <button
           onClick={toggleTheme}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/60 hover:bg-white/10 hover:text-white transition w-full"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-white/[0.04] hover:text-foreground transition w-full"
         >
           {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           {theme === "dark" ? "Light Mode" : "Dark Mode"}
         </button>
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/60 hover:bg-white/10 hover:text-white transition w-full"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-white/[0.04] hover:text-foreground transition w-full"
         >
           <LogOut className="w-5 h-5" />
           Sign Out

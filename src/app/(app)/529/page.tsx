@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import {
   BarChart,
   Bar,
@@ -14,7 +14,15 @@ import {
 import { GraduationCap, TrendingUp, DollarSign, Info, Calculator } from "lucide-react";
 import { Card, CardTitle } from "@/components/ui/card";
 import { ProgressBar } from "@/components/ui/progress-bar";
+import { SaveStatus } from "@/components/ui/save-status";
 import { formatCurrency, cn } from "@/lib/utils";
+import { useAutoSavedRow } from "@/lib/hooks/use-autosave";
+import {
+  COLLEGE_DEFAULTS,
+  collegeInputsFromRow,
+  rowFromCollegeInputs,
+  type CollegeInputs,
+} from "@/lib/college";
 
 // 2024 average costs, inflated to 2044 at ~5% college inflation
 const COLLEGE_COSTS_2044 = {
@@ -24,10 +32,20 @@ const COLLEGE_COSTS_2044 = {
 };
 
 export default function FiveTwentyNinePage() {
-  const [monthlyContribution, setMonthlyContribution] = useState(250);
-  const [initialDeposit, setInitialDeposit] = useState(0);
-  const [expectedReturn, setExpectedReturn] = useState(7);
-  const [years, setYears] = useState(18);
+  // Loaded from the household row, then auto-saved on every edit.
+  const { values, setValues, saveState, canSave } = useAutoSavedRow<CollegeInputs>({
+    table: "college_calculator",
+    defaults: COLLEGE_DEFAULTS,
+    fromRow: collegeInputsFromRow,
+    toRow: rowFromCollegeInputs,
+  });
+
+  const { monthlyContribution, initialDeposit, expectedReturn, years } = values;
+
+  const setMonthlyContribution = (monthlyContribution: number) => setValues({ monthlyContribution });
+  const setInitialDeposit = (initialDeposit: number) => setValues({ initialDeposit });
+  const setExpectedReturn = (expectedReturn: number) => setValues({ expectedReturn });
+  const setYears = (years: number) => setValues({ years });
 
   // Calculate projected balance year by year
   const projections = useMemo(() => {
@@ -70,46 +88,52 @@ export default function FiveTwentyNinePage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Page header */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">529 College Savings Calculator</h1>
-        <p className="text-muted-foreground text-sm mt-1">Plan for your child&apos;s education with tax-advantaged growth</p>
+      <div className="flex items-start gap-3">
+        <div className="accent-soft flex h-11 w-11 shrink-0 items-center justify-center rounded-xl">
+          <Calculator className="h-5 w-5 text-teal" />
+        </div>
+        <div className="flex-1">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">529 College Savings Calculator</h1>
+          <p className="text-muted-foreground text-sm mt-1">Plan for your child&apos;s education with tax-advantaged growth</p>
+        </div>
+        <SaveStatus state={saveState} show={canSave} />
       </div>
 
       {/* Top Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
+        <Card className="card-hover">
           <CardTitle>Projected Balance</CardTitle>
-          <p className="text-2xl font-bold text-navy mt-2">{formatCurrency(projectedBalance)}</p>
+          <p className="text-3xl font-bold text-gradient mt-2">{formatCurrency(projectedBalance)}</p>
           <p className="text-xs text-muted-foreground mt-1">after {years} years</p>
         </Card>
-        <Card>
+        <Card className="card-hover">
           <CardTitle>Total Contributions</CardTitle>
-          <p className="text-2xl font-bold text-navy-light mt-2">{formatCurrency(totalContributions)}</p>
+          <p className="text-3xl font-bold text-navy mt-2">{formatCurrency(totalContributions)}</p>
           <p className="text-xs text-muted-foreground mt-1">your money in</p>
         </Card>
-        <Card>
+        <Card className="card-hover">
           <CardTitle>Investment Growth</CardTitle>
-          <p className="text-2xl font-bold text-teal mt-2">{formatCurrency(totalGrowth)}</p>
+          <p className="text-3xl font-bold text-teal mt-2">{formatCurrency(totalGrowth)}</p>
           <p className="text-xs text-muted-foreground mt-1">
             {totalContributions > 0 ? `${((totalGrowth / totalContributions) * 100).toFixed(0)}%` : "0%"} return on contributions
           </p>
         </Card>
-        <Card>
+        <Card className="card-hover">
           <CardTitle>Monthly Investment</CardTitle>
-          <p className="text-2xl font-bold text-foreground mt-2">{formatCurrency(monthlyContribution)}/mo</p>
+          <p className="text-3xl font-bold text-foreground mt-2">{formatCurrency(monthlyContribution)}/mo</p>
           <p className="text-xs text-muted-foreground mt-1">{formatCurrency(monthlyContribution * 12)}/year</p>
         </Card>
       </div>
 
       {/* Input Controls */}
       <Card>
-        <CardTitle>Calculator Inputs</CardTitle>
+        <h2 className="text-lg font-semibold text-foreground">Calculator Inputs</h2>
         <div className="grid md:grid-cols-2 gap-6 mt-4">
           {/* Monthly Contribution */}
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-sm text-foreground font-medium">Monthly Contribution</label>
-              <span className="text-sm font-bold text-navy">{formatCurrency(monthlyContribution)}</span>
+              <span className="text-sm font-bold text-teal">{formatCurrency(monthlyContribution)}</span>
             </div>
             <input
               type="range"
@@ -118,7 +142,7 @@ export default function FiveTwentyNinePage() {
               step={25}
               value={monthlyContribution}
               onChange={(e) => setMonthlyContribution(Number(e.target.value))}
-              className="w-full accent-navy h-2 rounded-full"
+              className="w-full accent-teal h-2 rounded-full"
             />
             <div className="flex justify-between text-xs text-muted-foreground mt-1">
               <span>$50</span>
@@ -130,7 +154,7 @@ export default function FiveTwentyNinePage() {
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-sm text-foreground font-medium">Initial Deposit</label>
-              <span className="text-sm font-bold text-navy">{formatCurrency(initialDeposit)}</span>
+              <span className="text-sm font-bold text-teal">{formatCurrency(initialDeposit)}</span>
             </div>
             <input
               type="range"
@@ -139,7 +163,7 @@ export default function FiveTwentyNinePage() {
               step={500}
               value={initialDeposit}
               onChange={(e) => setInitialDeposit(Number(e.target.value))}
-              className="w-full accent-navy h-2 rounded-full"
+              className="w-full accent-teal h-2 rounded-full"
             />
             <div className="flex justify-between text-xs text-muted-foreground mt-1">
               <span>$0</span>
@@ -151,7 +175,7 @@ export default function FiveTwentyNinePage() {
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-sm text-foreground font-medium">Expected Annual Return</label>
-              <span className="text-sm font-bold text-navy">{expectedReturn}%</span>
+              <span className="text-sm font-bold text-teal">{expectedReturn}%</span>
             </div>
             <input
               type="range"
@@ -160,7 +184,7 @@ export default function FiveTwentyNinePage() {
               step={0.5}
               value={expectedReturn}
               onChange={(e) => setExpectedReturn(Number(e.target.value))}
-              className="w-full accent-navy h-2 rounded-full"
+              className="w-full accent-teal h-2 rounded-full"
             />
             <div className="flex justify-between text-xs text-muted-foreground mt-1">
               <span>3%</span>
@@ -172,7 +196,7 @@ export default function FiveTwentyNinePage() {
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-sm text-foreground font-medium">Years Until College</label>
-              <span className="text-sm font-bold text-navy">{years} years</span>
+              <span className="text-sm font-bold text-teal">{years} years</span>
             </div>
             <input
               type="range"
@@ -181,7 +205,7 @@ export default function FiveTwentyNinePage() {
               step={1}
               value={years}
               onChange={(e) => setYears(Number(e.target.value))}
-              className="w-full accent-navy h-2 rounded-full"
+              className="w-full accent-teal h-2 rounded-full"
             />
             <div className="flex justify-between text-xs text-muted-foreground mt-1">
               <span>5 years</span>
@@ -193,28 +217,29 @@ export default function FiveTwentyNinePage() {
 
       {/* Growth Chart */}
       <Card>
-        <CardTitle>Year-by-Year Growth</CardTitle>
+        <h2 className="text-lg font-semibold text-foreground">Year-by-Year Growth</h2>
         <div className="mt-4 h-72">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" />
               <XAxis
                 dataKey="year"
-                tick={{ fontSize: 11 }}
-                stroke="var(--muted-fg)"
+                tick={{ fontSize: 11, fill: "#8B90A0" }}
+                stroke="rgba(255,255,255,0.08)"
                 tickFormatter={(v) => `Yr ${v}`}
               />
               <YAxis
                 tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
-                tick={{ fontSize: 11 }}
-                stroke="var(--muted-fg)"
+                tick={{ fontSize: 11, fill: "#8B90A0" }}
+                stroke="rgba(255,255,255,0.08)"
               />
               <Tooltip
+                cursor={{ fill: "rgba(255,255,255,0.04)" }}
                 formatter={(value) => formatCurrency(Number(value))}
                 contentStyle={{
                   backgroundColor: "var(--card-bg)",
                   border: "1px solid var(--border-color)",
-                  borderRadius: "8px",
+                  borderRadius: "12px",
                   fontSize: 12,
                 }}
               />
@@ -223,8 +248,8 @@ export default function FiveTwentyNinePage() {
                   value === "contributions" ? "Your Contributions" : "Investment Growth"
                 }
               />
-              <Bar dataKey="contributions" stackId="a" fill="#456282" radius={[0, 0, 0, 0]} />
-              <Bar dataKey="growth" stackId="a" fill="#3B7D62" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="contributions" stackId="a" fill="#5B8DEF" radius={[0, 0, 0, 0]} />
+              <Bar dataKey="growth" stackId="a" fill="#2EE6C5" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -232,9 +257,11 @@ export default function FiveTwentyNinePage() {
 
       {/* College Cost Comparison */}
       <Card>
-        <div className="flex items-center gap-2 mb-4">
-          <GraduationCap className="w-5 h-5 text-navy" />
-          <CardTitle>College Cost Comparison (Estimated 2044)</CardTitle>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="accent-soft flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
+            <GraduationCap className="w-4 h-4 text-teal" />
+          </div>
+          <h2 className="text-lg font-semibold text-foreground">College Cost Comparison (Estimated 2044)</h2>
         </div>
         <p className="text-xs text-muted-foreground mb-4">
           Projected 4-year costs based on current averages with ~5% annual college inflation
@@ -343,7 +370,7 @@ export default function FiveTwentyNinePage() {
 
         {/* Shortfall/surplus */}
         {projectedBalance < COLLEGE_COSTS_2044.in_state_public && (
-          <div className="mt-4 p-3 bg-amber/10 border border-amber/20 rounded-lg">
+          <div className="mt-4 glass rounded-2xl p-4 border-amber/30 bg-amber/[0.06]">
             <p className="text-sm text-amber font-medium">
               Shortfall for in-state public: {formatCurrency(COLLEGE_COSTS_2044.in_state_public - projectedBalance)}
             </p>
@@ -363,44 +390,46 @@ export default function FiveTwentyNinePage() {
       </Card>
 
       {/* ScholarShare Info */}
-      <Card className="border-l-4 border-l-navy">
+      <Card className="border-l-4 border-l-teal">
         <div className="flex items-start gap-3">
-          <Info className="w-5 h-5 text-navy shrink-0 mt-0.5" />
+          <div className="accent-soft flex h-9 w-9 shrink-0 items-center justify-center rounded-lg mt-0.5">
+            <Info className="w-4 h-4 text-teal" />
+          </div>
           <div>
-            <h3 className="text-sm font-semibold text-foreground">California ScholarShare 529</h3>
+            <h3 className="text-base font-semibold text-foreground">California ScholarShare 529</h3>
             <ul className="text-sm text-muted-foreground mt-2 space-y-1.5">
               <li className="flex items-start gap-2">
-                <span className="text-navy font-bold">1.</span>
+                <span className="text-teal font-bold">1.</span>
                 <span>
                   <strong>Tax-free growth</strong> — No federal or California state tax on qualified education withdrawals
                 </span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-navy font-bold">2.</span>
+                <span className="text-teal font-bold">2.</span>
                 <span>
                   <strong>Low fees</strong> — Managed by TIAA-CREF with expense ratios from 0.07% to 0.37%
                 </span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-navy font-bold">3.</span>
+                <span className="text-teal font-bold">3.</span>
                 <span>
                   <strong>Age-based portfolios</strong> — Automatically shift from aggressive to conservative as college approaches
                 </span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-navy font-bold">4.</span>
+                <span className="text-teal font-bold">4.</span>
                 <span>
                   <strong>Flexible use</strong> — Can be used for tuition, room & board, books, supplies, and K-12 ($10K/yr limit)
                 </span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-navy font-bold">5.</span>
+                <span className="text-teal font-bold">5.</span>
                 <span>
                   <strong>Rollover to Roth IRA</strong> — Starting 2024, unused 529 funds can be rolled into a beneficiary Roth IRA (up to $35K lifetime, subject to annual limits)
                 </span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-navy font-bold">6.</span>
+                <span className="text-teal font-bold">6.</span>
                 <span>
                   <strong>Gift tax benefits</strong> — Contribute up to $18K/year ($36K married) without gift tax, or superfund 5 years at once
                 </span>

@@ -128,27 +128,29 @@ function JoinContent() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <div className="max-w-md w-full bg-card rounded-xl border border-border p-8 text-center">
-        <Shield className="w-12 h-12 text-teal mx-auto mb-4" />
-        <h1 className="text-2xl font-bold text-foreground mb-2">FamilyVault</h1>
+      <div className="max-w-md w-full glass glow-accent rounded-2xl p-8 text-center">
+        <span className="w-12 h-12 rounded-xl accent-soft flex items-center justify-center mx-auto mb-4">
+          <Shield className="w-6 h-6 text-teal" />
+        </span>
+        <h1 className="text-2xl font-bold text-gradient tracking-tight mb-2">FamilyVault</h1>
 
         {status === "loading" && (
           <div className="py-8">
             <Loader2 className="w-8 h-8 animate-spin text-teal mx-auto" />
-            <p className="text-muted mt-3">Checking invite...</p>
+            <p className="text-muted-foreground mt-3">Checking invite...</p>
           </div>
         )}
 
         {status === "invalid" && (
           <div className="py-8">
-            <XCircle className="w-12 h-12 text-red-500 mx-auto mb-3" />
+            <XCircle className="w-12 h-12 text-coral mx-auto mb-3" />
             <p className="text-foreground font-medium">Invalid or Expired Invite</p>
-            <p className="text-muted text-sm mt-2">
+            <p className="text-muted-foreground text-sm mt-2">
               {error || "This invite link is no longer valid. Ask your family member to send a new one."}
             </p>
             <Link
               href="/login"
-              className="inline-block mt-4 px-4 py-2 bg-teal text-white rounded-lg font-medium hover:bg-teal/90 transition"
+              className="inline-block mt-4 bg-teal text-[#08090D] rounded-lg px-4 py-2.5 font-medium hover:bg-teal-light transition"
             >
               Go to Login
             </Link>
@@ -157,15 +159,15 @@ function JoinContent() {
 
         {status === "ready" && invite && (
           <div className="py-6">
-            <p className="text-foreground mb-1">You&apos;ve been invited to join</p>
+            <p className="text-muted-foreground mb-1">You&apos;ve been invited to join</p>
             <p className="text-xl font-bold text-teal mb-6">{invite.household_name}</p>
-            <p className="text-muted text-sm mb-6">
+            <p className="text-muted-foreground text-sm mb-6">
               Once you join, you&apos;ll share all financial data with this household.
               Any data you&apos;ve already added will be merged in.
             </p>
             <button
               onClick={acceptInvite}
-              className="w-full px-4 py-3 bg-teal text-white rounded-lg font-medium hover:bg-teal/90 transition"
+              className="w-full bg-teal text-[#08090D] rounded-lg px-4 py-3 font-medium hover:bg-teal-light transition"
             >
               Accept & Join Household
             </button>
@@ -175,20 +177,20 @@ function JoinContent() {
         {status === "joining" && (
           <div className="py-8">
             <Loader2 className="w-8 h-8 animate-spin text-teal mx-auto" />
-            <p className="text-muted mt-3">Joining household...</p>
+            <p className="text-muted-foreground mt-3">Joining household...</p>
           </div>
         )}
 
         {status === "success" && (
           <div className="py-8">
-            <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
+            <CheckCircle className="w-12 h-12 text-teal mx-auto mb-3" />
             <p className="text-foreground font-medium">Welcome to the family!</p>
-            <p className="text-muted text-sm mt-2">
+            <p className="text-muted-foreground text-sm mt-2">
               You now share all data with your household.
             </p>
             <Link
               href="/dashboard"
-              className="inline-block mt-4 px-4 py-3 bg-teal text-white rounded-lg font-medium hover:bg-teal/90 transition"
+              className="inline-block mt-4 bg-teal text-[#08090D] rounded-lg px-4 py-3 font-medium hover:bg-teal-light transition"
             >
               Go to Dashboard
             </Link>
@@ -197,12 +199,12 @@ function JoinContent() {
 
         {status === "error" && (
           <div className="py-8">
-            <XCircle className="w-12 h-12 text-red-500 mx-auto mb-3" />
+            <XCircle className="w-12 h-12 text-coral mx-auto mb-3" />
             <p className="text-foreground font-medium">Error</p>
-            <p className="text-muted text-sm mt-2">{error}</p>
+            <p className="text-muted-foreground text-sm mt-2">{error}</p>
             <button
               onClick={() => setStatus("ready")}
-              className="inline-block mt-4 px-4 py-2 bg-teal text-white rounded-lg font-medium hover:bg-teal/90 transition"
+              className="inline-block mt-4 bg-teal text-[#08090D] rounded-lg px-4 py-2.5 font-medium hover:bg-teal-light transition"
             >
               Try Again
             </button>

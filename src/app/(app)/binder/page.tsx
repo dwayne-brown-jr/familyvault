@@ -95,19 +95,19 @@ const DIGITAL_TYPE_LABELS: Record<string, string> = {
 const STATUS_BADGE: Record<string, { label: string; className: string }> = {
   not_started: {
     label: "Not Started",
-    className: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
+    className: "bg-white/[0.06] text-muted-foreground border border-border",
   },
   in_progress: {
     label: "In Progress",
-    className: "bg-amber/10 text-amber",
+    className: "bg-amber/15 text-amber border border-amber/25",
   },
   complete: {
     label: "Complete",
-    className: "bg-teal/10 text-teal",
+    className: "bg-teal/15 text-teal border border-teal/25",
   },
   needs_review: {
     label: "Needs Review",
-    className: "bg-coral/10 text-coral",
+    className: "bg-coral/15 text-coral border border-coral/25",
   },
 };
 
@@ -116,7 +116,7 @@ const STATUS_ORDER = ["not_started", "in_progress", "complete", "needs_review"];
 // ─── Shared form input class ──────────────────────────────────
 
 const INPUT_CLASS =
-  "bg-surface border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-navy/30 w-full";
+  "bg-white/[0.04] border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent w-full";
 
 // ─── Letter prompts ────────────────────────────────────────────
 
@@ -156,7 +156,7 @@ export default function BinderPage() {
     <div className="space-y-6">
       {/* Page header */}
       <div>
-        <h1 className="text-2xl font-bold text-foreground">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
           Emergency Binder
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
@@ -177,8 +177,8 @@ export default function BinderPage() {
                 className={cn(
                   "flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap",
                   isActive
-                    ? "bg-primary text-white"
-                    : "text-muted-foreground hover:text-foreground hover:bg-surface-hover"
+                    ? "accent-soft text-teal"
+                    : "text-muted-foreground hover:text-foreground hover:bg-white/[0.05]"
                 )}
               >
                 <Icon className="w-4 h-4" />
@@ -221,7 +221,7 @@ function DeleteButton({ onDelete }: { onDelete: () => void }) {
         e.stopPropagation();
         onDelete();
       }}
-      className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-coral/10"
+      className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg hover:bg-coral/10"
       title="Delete"
     >
       <Trash2 className="w-4 h-4 text-coral" />
@@ -239,7 +239,7 @@ function AddButton({
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-hover transition-colors"
+      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#08090D] bg-teal rounded-lg hover:bg-teal-light transition-colors"
     >
       <Plus className="w-4 h-4" />
       {label}
@@ -268,7 +268,7 @@ function EditableField({
         onChange={(e) => onChange(e.target.value)}
         className={cn(
           "text-sm bg-transparent border-b border-border outline-none w-full py-1 transition-colors",
-          "focus:border-navy dark:focus:border-blue-400",
+          "focus:border-teal",
           value ? "text-foreground" : "text-muted-foreground"
         )}
       />
@@ -342,10 +342,10 @@ function ContactsTab() {
 
       {/* Add form */}
       {showAddForm && (
-        <Card className="p-4 border-navy/30">
+        <Card className="p-4 border-teal/30 bg-teal/[0.04]">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-foreground">New Contact</h3>
-            <button onClick={() => setShowAddForm(false)} className="p-1 hover:bg-surface-hover rounded">
+            <button onClick={() => setShowAddForm(false)} className="p-1 hover:bg-white/[0.06] rounded-lg">
               <X className="w-4 h-4 text-muted-foreground" />
             </button>
           </div>
@@ -401,7 +401,7 @@ function ContactsTab() {
             <button
               onClick={handleAdd}
               disabled={!newContact.name.trim()}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#08090D] bg-teal rounded-lg hover:bg-teal-light transition-colors disabled:opacity-50"
             >
               <Plus className="w-4 h-4" />
               Add
@@ -426,7 +426,7 @@ function ContactsTab() {
                   <div className="flex flex-col gap-3">
                     {/* Role label + delete */}
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-semibold text-navy dark:text-blue-400">
+                      <p className="text-sm font-semibold text-teal">
                         {contact.role}
                       </p>
                       <DeleteButton onDelete={() => handleDelete(contact.id)} />
@@ -586,10 +586,10 @@ function LegalTab() {
 
       {/* Add form */}
       {showAddForm && (
-        <Card className="p-4 border-navy/30">
+        <Card className="p-4 border-teal/30 bg-teal/[0.04]">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-foreground">New Document</h3>
-            <button onClick={() => setShowAddForm(false)} className="p-1 hover:bg-surface-hover rounded">
+            <button onClick={() => setShowAddForm(false)} className="p-1 hover:bg-white/[0.06] rounded-lg">
               <X className="w-4 h-4 text-muted-foreground" />
             </button>
           </div>
@@ -638,7 +638,7 @@ function LegalTab() {
             <button
               onClick={handleAdd}
               disabled={!newDoc.doc_type.trim()}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#08090D] bg-teal rounded-lg hover:bg-teal-light transition-colors disabled:opacity-50"
             >
               <Plus className="w-4 h-4" />
               Add
@@ -655,7 +655,7 @@ function LegalTab() {
 
           if (isEditing) {
             return (
-              <Card key={doc.id} className="p-4 border-navy/30">
+              <Card key={doc.id} className="p-4 border-teal/30 bg-teal/[0.04]">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   <input
                     type="text"
@@ -694,7 +694,7 @@ function LegalTab() {
                   </button>
                   <button
                     onClick={() => saveEdit(doc.id)}
-                    className="flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-hover transition-colors"
+                    className="flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-[#08090D] bg-teal rounded-lg hover:bg-teal-light transition-colors"
                   >
                     <Save className="w-3.5 h-3.5" />
                     Save
@@ -708,7 +708,7 @@ function LegalTab() {
             <Card key={doc.id} className="p-4 group">
               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 {/* Status icon */}
-                <div className="shrink-0">
+                <span className="flex items-center justify-center w-9 h-9 rounded-xl bg-white/[0.04] shrink-0">
                   {doc.status === "complete" ? (
                     <Check className="w-5 h-5 text-teal" />
                   ) : doc.status === "in_progress" ? (
@@ -716,9 +716,9 @@ function LegalTab() {
                   ) : doc.status === "needs_review" ? (
                     <AlertTriangle className="w-5 h-5 text-coral" />
                   ) : (
-                    <CircleDot className="w-5 h-5 text-gray-400" />
+                    <CircleDot className="w-5 h-5 text-muted-foreground" />
                   )}
-                </div>
+                </span>
 
                 {/* Document name */}
                 <div className="flex-1 min-w-0">
@@ -751,7 +751,7 @@ function LegalTab() {
                 <button
                   onClick={() => cycleStatus(doc)}
                   className={cn(
-                    "text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap shrink-0 cursor-pointer hover:ring-2 hover:ring-navy/20 transition-all",
+                    "text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap shrink-0 cursor-pointer hover:ring-2 hover:ring-teal/30 transition-all",
                     badge.className
                   )}
                   title="Click to change status"
@@ -762,7 +762,7 @@ function LegalTab() {
                 {/* Edit button */}
                 <button
                   onClick={() => startEdit(doc)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-surface-hover"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg hover:bg-white/[0.06]"
                   title="Edit"
                 >
                   <Pencil className="w-4 h-4 text-muted-foreground" />
@@ -899,10 +899,10 @@ function FinancialTab() {
 
       {/* Add form */}
       {showAddForm && (
-        <Card className="p-4 border-navy/30">
+        <Card className="p-4 border-teal/30 bg-teal/[0.04]">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-foreground">New Financial Account</h3>
-            <button onClick={() => setShowAddForm(false)} className="p-1 hover:bg-surface-hover rounded">
+            <button onClick={() => setShowAddForm(false)} className="p-1 hover:bg-white/[0.06] rounded-lg">
               <X className="w-4 h-4 text-muted-foreground" />
             </button>
           </div>
@@ -971,7 +971,7 @@ function FinancialTab() {
             <button
               onClick={handleAdd}
               disabled={!newAccount.institution.trim()}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#08090D] bg-teal rounded-lg hover:bg-teal-light transition-colors disabled:opacity-50"
             >
               <Plus className="w-4 h-4" />
               Add
@@ -983,7 +983,7 @@ function FinancialTab() {
       {/* Groups */}
       {Object.entries(groups).map(([type, accts]) => (
         <div key={type}>
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+          <h2 className="text-lg font-semibold text-foreground mb-3">
             {ACCOUNT_TYPE_LABELS[type] || type.replace(/_/g, " ")}
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
@@ -993,7 +993,7 @@ function FinancialTab() {
 
               if (isEditing) {
                 return (
-                  <Card key={acct.id} className="p-4 border-navy/30">
+                  <Card key={acct.id} className="p-4 border-teal/30 bg-teal/[0.04]">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <input
                         type="text"
@@ -1064,7 +1064,7 @@ function FinancialTab() {
                       </button>
                       <button
                         onClick={() => saveEdit(acct.id)}
-                        className="flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-hover transition-colors"
+                        className="flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-[#08090D] bg-teal rounded-lg hover:bg-teal-light transition-colors"
                       >
                         <Save className="w-3.5 h-3.5" />
                         Save
@@ -1095,7 +1095,7 @@ function FinancialTab() {
                       )}
                       <button
                         onClick={() => startEdit(acct)}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-surface-hover"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg hover:bg-white/[0.06]"
                         title="Edit"
                       >
                         <Pencil className="w-4 h-4 text-muted-foreground" />
@@ -1270,10 +1270,10 @@ function InsuranceTab() {
 
       {/* Add form */}
       {showAddForm && (
-        <Card className="p-4 border-navy/30">
+        <Card className="p-4 border-teal/30 bg-teal/[0.04]">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-foreground">New Insurance Policy</h3>
-            <button onClick={() => setShowAddForm(false)} className="p-1 hover:bg-surface-hover rounded">
+            <button onClick={() => setShowAddForm(false)} className="p-1 hover:bg-white/[0.06] rounded-lg">
               <X className="w-4 h-4 text-muted-foreground" />
             </button>
           </div>
@@ -1360,7 +1360,7 @@ function InsuranceTab() {
             <button
               onClick={handleAdd}
               disabled={!newPolicy.policy_type.trim()}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#08090D] bg-teal rounded-lg hover:bg-teal-light transition-colors disabled:opacity-50"
             >
               <Plus className="w-4 h-4" />
               Add
@@ -1370,9 +1370,11 @@ function InsuranceTab() {
       )}
 
       {/* Coverage gap */}
-      <Card className="border-coral/30 bg-coral/5">
+      <div className="glass rounded-2xl p-5 border-coral/30 bg-coral/[0.06]">
         <div className="flex items-start gap-3 mb-4">
-          <AlertTriangle className="w-5 h-5 text-coral shrink-0 mt-0.5" />
+          <span className="flex items-center justify-center w-9 h-9 rounded-xl bg-coral/15 shrink-0">
+            <AlertTriangle className="w-5 h-5 text-coral" />
+          </span>
           <div>
             <h3 className="text-sm font-semibold text-foreground">
               Life Insurance Coverage Gap
@@ -1384,12 +1386,12 @@ function InsuranceTab() {
           </div>
         </div>
         <div className="relative">
-          <div className="w-full h-6 bg-surface-hover rounded-full overflow-hidden">
+          <div className="w-full h-6 bg-white/10 rounded-full overflow-hidden">
             <div
               className="h-full bg-coral rounded-full transition-all duration-500 flex items-center justify-end pr-2"
               style={{ width: `${gapPct}%` }}
             >
-              <span className="text-[10px] font-bold text-white">
+              <span className="text-[10px] font-bold text-[#08090D]">
                 {formatCurrency(currentLifeCoverage)}
               </span>
             </div>
@@ -1403,7 +1405,7 @@ function InsuranceTab() {
           Gap: {formatCurrency(recommendedCoverage - currentLifeCoverage)} --
           only {gapPct}% of recommended coverage
         </p>
-      </Card>
+      </div>
 
       {/* Policies */}
       <div className="space-y-3">
@@ -1412,7 +1414,7 @@ function InsuranceTab() {
 
           if (isEditing) {
             return (
-              <Card key={policy.id} className="p-4 border-navy/30">
+              <Card key={policy.id} className="p-4 border-teal/30 bg-teal/[0.04]">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   <input
                     type="text"
@@ -1500,7 +1502,7 @@ function InsuranceTab() {
                   </button>
                   <button
                     onClick={() => saveEdit(policy.id)}
-                    className="flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-hover transition-colors"
+                    className="flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-[#08090D] bg-teal rounded-lg hover:bg-teal-light transition-colors"
                   >
                     <Save className="w-3.5 h-3.5" />
                     Save
@@ -1533,7 +1535,7 @@ function InsuranceTab() {
                       )}
                     <button
                       onClick={() => startEdit(policy)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-surface-hover"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg hover:bg-white/[0.06]"
                       title="Edit"
                     >
                       <Pencil className="w-4 h-4 text-muted-foreground" />
@@ -1704,10 +1706,10 @@ function BillsTab() {
 
       {/* Add form */}
       {showAddForm && (
-        <Card className="p-4 border-navy/30">
+        <Card className="p-4 border-teal/30 bg-teal/[0.04]">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-foreground">New Bill</h3>
-            <button onClick={() => setShowAddForm(false)} className="p-1 hover:bg-surface-hover rounded">
+            <button onClick={() => setShowAddForm(false)} className="p-1 hover:bg-white/[0.06] rounded-lg">
               <X className="w-4 h-4 text-muted-foreground" />
             </button>
           </div>
@@ -1763,7 +1765,7 @@ function BillsTab() {
             <button
               onClick={handleAdd}
               disabled={!newBill.name.trim()}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#08090D] bg-teal rounded-lg hover:bg-teal-light transition-colors disabled:opacity-50"
             >
               <Plus className="w-4 h-4" />
               Add
@@ -1785,8 +1787,8 @@ function BillsTab() {
                 className={cn(
                   "relative aspect-square flex flex-col items-center justify-center rounded-lg text-xs transition-colors",
                   hasBills
-                    ? "bg-navy/10 font-semibold text-navy"
-                    : "bg-surface-hover/50 text-muted-foreground"
+                    ? "bg-teal/15 font-semibold text-teal border border-teal/25"
+                    : "bg-white/[0.04] text-muted-foreground"
                 )}
                 title={
                   hasBills
@@ -1800,7 +1802,7 @@ function BillsTab() {
                     {dayBills.map((b) => (
                       <div
                         key={b.id}
-                        className="w-1.5 h-1.5 rounded-full bg-navy"
+                        className="w-1.5 h-1.5 rounded-full bg-teal"
                       />
                     ))}
                   </div>
@@ -1820,7 +1822,7 @@ function BillsTab() {
 
             if (isEditing) {
               return (
-                <Card key={bill.id} className="p-4 border-navy/30">
+                <Card key={bill.id} className="p-4 border-teal/30 bg-teal/[0.04]">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     <input
                       type="text"
@@ -1878,7 +1880,7 @@ function BillsTab() {
                     </button>
                     <button
                       onClick={() => saveEdit(bill.id)}
-                      className="flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-hover transition-colors"
+                      className="flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-[#08090D] bg-teal rounded-lg hover:bg-teal-light transition-colors"
                     >
                       <Save className="w-3.5 h-3.5" />
                       Save
@@ -1892,8 +1894,8 @@ function BillsTab() {
               <Card key={bill.id} className="p-4 group">
                 <div className="flex items-center gap-4">
                   {/* Due date */}
-                  <div className="flex flex-col items-center justify-center w-12 h-12 rounded-lg bg-surface-hover shrink-0">
-                    <Calendar className="w-3 h-3 text-muted-foreground" />
+                  <div className="flex flex-col items-center justify-center w-12 h-12 rounded-xl accent-soft shrink-0">
+                    <Calendar className="w-3 h-3 text-teal" />
                     <span className="text-sm font-bold text-foreground">
                       {bill.due_date ?? "--"}
                     </span>
@@ -1917,7 +1919,7 @@ function BillsTab() {
 
                   {/* Autopay badge */}
                   {bill.is_autopay && (
-                    <span className="flex items-center gap-1 text-xs font-medium text-teal bg-teal/10 px-2 py-1 rounded-full shrink-0">
+                    <span className="flex items-center gap-1 text-xs font-medium text-teal bg-teal/15 border border-teal/25 px-2.5 py-0.5 rounded-full shrink-0">
                       <Zap className="w-3 h-3" />
                       Autopay
                     </span>
@@ -1931,7 +1933,7 @@ function BillsTab() {
                   {/* Edit button */}
                   <button
                     onClick={() => startEdit(bill)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-surface-hover"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg hover:bg-white/[0.06]"
                     title="Edit"
                   >
                     <Pencil className="w-4 h-4 text-muted-foreground" />
@@ -2025,25 +2027,25 @@ function DigitalTab() {
   function statusDisplay(item: DigitalAccess) {
     if (item.item_type === "legacy_setting") {
       return item.status === "not_setup" ? (
-        <span className="text-xs font-medium text-coral bg-coral/10 px-2 py-1 rounded-full">
+        <span className="text-xs font-medium text-coral bg-coral/15 border border-coral/25 px-2.5 py-0.5 rounded-full">
           Not Set Up
         </span>
       ) : (
-        <span className="text-xs font-medium text-teal bg-teal/10 px-2 py-1 rounded-full">
+        <span className="text-xs font-medium text-teal bg-teal/15 border border-teal/25 px-2.5 py-0.5 rounded-full">
           Configured
         </span>
       );
     }
     if (item.status === "complete") {
       return (
-        <span className="text-xs font-medium text-teal bg-teal/10 px-2 py-1 rounded-full">
+        <span className="text-xs font-medium text-teal bg-teal/15 border border-teal/25 px-2.5 py-0.5 rounded-full">
           Complete
         </span>
       );
     }
     if (item.status === "not_setup") {
       return (
-        <span className="text-xs font-medium text-amber bg-amber/10 px-2 py-1 rounded-full">
+        <span className="text-xs font-medium text-amber bg-amber/15 border border-amber/25 px-2.5 py-0.5 rounded-full">
           Needs Setup
         </span>
       );
@@ -2060,10 +2062,10 @@ function DigitalTab() {
 
       {/* Add form */}
       {showAddForm && (
-        <Card className="p-4 border-navy/30">
+        <Card className="p-4 border-teal/30 bg-teal/[0.04]">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-foreground">New Digital Item</h3>
-            <button onClick={() => setShowAddForm(false)} className="p-1 hover:bg-surface-hover rounded">
+            <button onClick={() => setShowAddForm(false)} className="p-1 hover:bg-white/[0.06] rounded-lg">
               <X className="w-4 h-4 text-muted-foreground" />
             </button>
           </div>
@@ -2105,7 +2107,7 @@ function DigitalTab() {
             <button
               onClick={handleAdd}
               disabled={!newItem.name.trim()}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#08090D] bg-teal rounded-lg hover:bg-teal-light transition-colors disabled:opacity-50"
             >
               <Plus className="w-4 h-4" />
               Add
@@ -2120,7 +2122,7 @@ function DigitalTab() {
 
         return (
           <div key={type}>
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+            <h2 className="text-lg font-semibold text-foreground mb-3">
               {DIGITAL_TYPE_LABELS[type] || type}
             </h2>
             <div className="space-y-2">
@@ -2129,7 +2131,7 @@ function DigitalTab() {
 
                 if (isEditing) {
                   return (
-                    <Card key={item.id} className="p-4 border-navy/30">
+                    <Card key={item.id} className="p-4 border-teal/30 bg-teal/[0.04]">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <select
                           value={editValues.item_type || "account"}
@@ -2173,7 +2175,7 @@ function DigitalTab() {
                         </button>
                         <button
                           onClick={() => saveEdit(item.id)}
-                          className="flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-hover transition-colors"
+                          className="flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-[#08090D] bg-teal rounded-lg hover:bg-teal-light transition-colors"
                         >
                           <Save className="w-3.5 h-3.5" />
                           Save
@@ -2186,7 +2188,9 @@ function DigitalTab() {
                 return (
                   <Card key={item.id} className="p-4 group">
                     <div className="flex items-center gap-4">
-                      <KeyRound className="w-4 h-4 text-muted-foreground shrink-0" />
+                      <span className="flex items-center justify-center w-9 h-9 rounded-xl accent-soft shrink-0">
+                        <KeyRound className="w-4 h-4 text-teal" />
+                      </span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-foreground">
                           {item.name}
@@ -2200,7 +2204,7 @@ function DigitalTab() {
                       {statusDisplay(item)}
                       <button
                         onClick={() => startEdit(item)}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-surface-hover"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg hover:bg-white/[0.06]"
                         title="Edit"
                       >
                         <Pencil className="w-4 h-4 text-muted-foreground" />
@@ -2259,9 +2263,11 @@ If you're reading this, it means I'm no longer able to be with you. I want you t
   return (
     <div className="space-y-6">
       {/* Info banner */}
-      <Card className="border-navy/20 bg-navy/5">
+      <div className="glass rounded-2xl p-5 border-navy/30 bg-navy/[0.06]">
         <div className="flex items-start gap-3">
-          <Info className="w-5 h-5 text-navy dark:text-blue-400 shrink-0 mt-0.5" />
+          <span className="flex items-center justify-center w-9 h-9 rounded-xl bg-navy/15 shrink-0">
+            <Info className="w-5 h-5 text-navy" />
+          </span>
           <div>
             <p className="text-sm font-medium text-foreground">
               About the Letter of Intent
@@ -2274,17 +2280,17 @@ If you're reading this, it means I'm no longer able to be with you. I want you t
             </p>
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Writing prompts */}
       <Card>
         <CardTitle className="mb-3">Guided Writing Prompts</CardTitle>
         <div className="space-y-1">
           {LETTER_PROMPTS.map((prompt, idx) => (
-            <div key={idx} className="border border-border rounded-lg">
+            <div key={idx} className="border border-border rounded-xl bg-white/[0.02]">
               <button
                 onClick={() => togglePrompt(idx)}
-                className="w-full flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-foreground hover:bg-surface-hover rounded-lg transition-colors text-left"
+                className="w-full flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-foreground hover:bg-white/[0.05] rounded-xl transition-colors text-left"
               >
                 {expandedPrompts[idx] ? (
                   <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />
@@ -2317,7 +2323,7 @@ If you're reading this, it means I'm no longer able to be with you. I want you t
             )}
             <button
               onClick={handleSave}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-hover transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#08090D] bg-teal rounded-lg hover:bg-teal-light transition-colors"
             >
               <Save className="w-4 h-4" />
               Save
@@ -2328,7 +2334,7 @@ If you're reading this, it means I'm no longer able to be with you. I want you t
           value={content}
           onChange={(e) => setContent(e.target.value)}
           rows={20}
-          className="w-full bg-surface-hover/50 border border-border rounded-lg p-4 text-sm text-foreground leading-relaxed resize-y outline-none focus:border-navy dark:focus:border-blue-400 transition-colors"
+          className="w-full bg-white/[0.04] border border-border rounded-lg p-4 text-sm text-foreground leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent transition-colors"
           placeholder="Begin writing your letter of intent..."
         />
         <p className="text-xs text-muted-foreground mt-2 text-right">

@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   Settings,
   BookOpen,
+  Sparkles,
   Moon,
   Sun,
   LogOut,
@@ -23,6 +24,7 @@ import { useTheme } from "@/lib/theme-provider";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/assistant", label: "Vault Assistant", icon: Sparkles },
   { href: "/binder", label: "Emergency Binder", icon: FolderLock },
   { href: "/action-plan", label: "Action Plan", icon: ListChecks },
   { href: "/529", label: "529 Calculator", icon: GraduationCap },
@@ -45,14 +47,16 @@ export function MobileHeader() {
 
   return (
     <>
-      <header className="lg:hidden flex items-center justify-between px-4 py-3 bg-card border-b border-border sticky top-0 z-40 safe-area-pt">
-        <div className="flex items-center gap-2">
-          <Shield className="w-6 h-6 text-navy" />
-          <span className="font-bold text-foreground">FamilyVault</span>
+      <header className="lg:hidden flex items-center justify-between px-4 py-3 glass-nav border-b border-border sticky top-0 z-40 safe-area-pt">
+        <div className="flex items-center gap-2.5">
+          <div className="flex items-center justify-center w-8 h-8 rounded-lg accent-soft">
+            <Shield className="w-4.5 h-4.5 text-teal" />
+          </div>
+          <span className="font-bold text-gradient">FamilyVault</span>
         </div>
         <button
           onClick={() => setOpen(!open)}
-          className="p-2 rounded-lg hover:bg-surface-hover transition"
+          className="p-2 rounded-lg hover:bg-white/[0.06] transition text-foreground"
         >
           {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
@@ -60,17 +64,19 @@ export function MobileHeader() {
 
       {/* Mobile menu overlay */}
       {open && (
-        <div className="lg:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setOpen(false)}>
+        <div className="lg:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" onClick={() => setOpen(false)}>
           <div
-            className="absolute right-0 top-0 bottom-0 w-72 bg-sidebar text-white p-4 space-y-1 overflow-y-auto"
+            className="absolute right-0 top-0 bottom-0 w-72 glass-nav border-l border-border p-4 space-y-1 overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-6 px-2">
-              <div className="flex items-center gap-2">
-                <Shield className="w-6 h-6 text-teal" />
-                <span className="font-bold">FamilyVault</span>
+              <div className="flex items-center gap-2.5">
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg accent-soft">
+                  <Shield className="w-4.5 h-4.5 text-teal" />
+                </div>
+                <span className="font-bold text-gradient">FamilyVault</span>
               </div>
-              <button onClick={() => setOpen(false)} className="p-1">
+              <button onClick={() => setOpen(false)} className="p-1 text-foreground">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -83,8 +89,10 @@ export function MobileHeader() {
                   href={item.href}
                   onClick={() => setOpen(false)}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition",
-                    isActive ? "bg-white/15 text-white" : "text-white/60 hover:bg-white/10 hover:text-white"
+                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition",
+                    isActive
+                      ? "accent-soft text-teal"
+                      : "text-muted-foreground hover:bg-white/[0.05] hover:text-foreground"
                   )}
                 >
                   <item.icon className="w-5 h-5" />
@@ -93,17 +101,17 @@ export function MobileHeader() {
               );
             })}
 
-            <div className="border-t border-white/10 mt-4 pt-4 space-y-1">
+            <div className="border-t border-border mt-4 pt-4 space-y-1">
               <button
                 onClick={toggleTheme}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/60 hover:bg-white/10 hover:text-white transition w-full"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-white/[0.05] hover:text-foreground transition w-full"
               >
                 {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                 {theme === "dark" ? "Light Mode" : "Dark Mode"}
               </button>
               <button
                 onClick={handleSignOut}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/60 hover:bg-white/10 hover:text-white transition w-full"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-white/[0.05] hover:text-foreground transition w-full"
               >
                 <LogOut className="w-5 h-5" />
                 Sign Out

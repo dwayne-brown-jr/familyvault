@@ -27,7 +27,9 @@ import {
   useFinancialAccounts,
   useMonthlyBills,
   useDigitalAccess,
+  useInsuranceCalculator,
 } from "@/lib/hooks/use-data";
+import { computeInsurance } from "@/lib/insurance";
 
 export default function DashboardPage() {
   const { data: actionItems, loading: actionsLoading } = useActionItems();
@@ -37,23 +39,24 @@ export default function DashboardPage() {
   const { data: accounts, loading: accountsLoading } = useFinancialAccounts();
   const { data: bills, loading: billsLoading } = useMonthlyBills();
   const { data: digitalAccess, loading: digitalLoading } = useDigitalAccess();
+  const { inputs: insuranceInputs, loading: insCalcLoading } = useInsuranceCalculator();
 
-  const isLoading = actionsLoading || docsLoading || insuranceLoading || contactsLoading || accountsLoading || billsLoading || digitalLoading;
+  const isLoading = actionsLoading || docsLoading || insuranceLoading || contactsLoading || accountsLoading || billsLoading || digitalLoading || insCalcLoading;
 
   if (isLoading) {
     return (
       <div className="space-y-6 max-w-7xl mx-auto">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Dashboard</h1>
           <p className="text-muted-foreground text-sm mt-1">Your family&apos;s protection at a glance</p>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
             <Card key={i}>
               <div className="animate-pulse space-y-3">
-                <div className="h-3 bg-surface-hover rounded w-24" />
-                <div className="h-7 bg-surface-hover rounded w-32" />
-                <div className="h-2 bg-surface-hover rounded w-20" />
+                <div className="h-3 bg-white/10 rounded w-24" />
+                <div className="h-7 bg-white/10 rounded w-32" />
+                <div className="h-2 bg-white/10 rounded w-20" />
               </div>
             </Card>
           ))}
@@ -74,12 +77,12 @@ export default function DashboardPage() {
   const totalBills = bills.length;
   const digitalItems = digitalAccess.length;
 
-  // Insurance coverage
-  const lifeCoverage = insurancePolicies
-    .filter((p) => p.policy_type.toLowerCase().includes("life"))
-    .reduce((s, p) => s + (p.coverage_amount ?? 0), 0);
-  const recommendedCoverage = 2750000;
-  const coveragePercent = Math.min(100, Math.round((lifeCoverage / recommendedCoverage) * 100));
+  // Insurance coverage — from the saved Insurance Gap calculator (single source
+  // of truth shared with the Insurance page via @/lib/insurance).
+  const ins = computeInsurance(insuranceInputs);
+  const lifeCoverage = ins.currentCoverage;
+  const recommendedCoverage = ins.recommendedTotal;
+  const coveragePercent = Math.round(ins.coveragePercent);
   const hasAdequateInsurance = coveragePercent >= 80;
 
   // Action plan progress
@@ -103,95 +106,116 @@ export default function DashboardPage() {
     { href: "/guide", label: "How It Works", icon: BookOpen, color: "text-amber" },
   ];
 
+  const readinessTone =
+    readinessScore >= 70 ? "text-teal" : readinessScore >= 40 ? "text-amber" : "text-coral";
+  const readinessBar =
+    readinessScore >= 70 ? "bg-teal" : readinessScore >= 40 ? "bg-amber" : "bg-coral";
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Page header */}
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Dashboard</h1>
         <p className="text-muted-foreground text-sm mt-1">Your family&apos;s protection at a glance</p>
       </div>
 
-      {/* Readiness Score */}
-      <Card className="border-l-4" style={{ borderLeftColor: readinessScore >= 70 ? "#3B7D62" : readinessScore >= 40 ? "#B8922E" : "#B85450" }}>
-        <div className="flex items-center justify-between">
+      {/* Readiness Score — hero */}
+      <Card className="relative overflow-hidden glow-accent">
+        <div
+          className="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full blur-3xl opacity-30"
+          style={{ background: "radial-gradient(circle, rgba(46,230,197,0.5), transparent 70%)" }}
+        />
+        <div className="relative flex items-start justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <p className="text-xs font-medium tracking-wide text-muted-foreground">
               Family Protection Readiness
             </p>
-            <div className="flex items-center gap-3 mt-1">
-              <Shield className={`w-8 h-8 ${readinessScore >= 70 ? "text-teal" : readinessScore >= 40 ? "text-amber" : "text-coral"}`} />
-              <p className={`text-3xl font-bold ${readinessScore >= 70 ? "text-teal" : readinessScore >= 40 ? "text-amber" : "text-coral"}`}>
-                {readinessScore}%
+            <div className="flex items-end gap-3 mt-2">
+              <div className="flex items-center justify-center w-12 h-12 rounded-2xl accent-soft">
+                <Shield className={`w-6 h-6 ${readinessTone}`} />
+              </div>
+              <p className="text-5xl font-bold tracking-tight text-gradient leading-none">
+                {readinessScore}<span className="text-2xl align-top">%</span>
               </p>
             </div>
           </div>
-          <Link href="/action-plan" className="text-sm text-navy hover:underline flex items-center gap-1">
+          <Link
+            href="/action-plan"
+            className="text-sm text-teal hover:text-teal-light flex items-center gap-1 transition"
+          >
             View Plan <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
-        <ProgressBar
-          value={readinessScore}
-          color={readinessScore >= 70 ? "bg-teal" : readinessScore >= 40 ? "bg-amber" : "bg-coral"}
-          className="mt-3"
-          size="lg"
-        />
+        <ProgressBar value={readinessScore} color={readinessBar} className="relative mt-5" size="lg" />
       </Card>
 
       {/* Top metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardTitle>Legal Documents</CardTitle>
+        <Card className="card-hover">
+          <div className="flex items-center justify-between">
+            <CardTitle>Legal Documents</CardTitle>
+            <FileText className="w-4 h-4 text-muted-foreground" />
+          </div>
           <p className="text-2xl font-bold text-foreground mt-2">{completedDocs}/{totalDocs}</p>
-          <ProgressBar value={docsPercent} color={docsPercent >= 80 ? "bg-teal" : "bg-amber"} className="mt-2" size="sm" />
-          <p className="text-xs text-muted-foreground mt-1">
+          <ProgressBar value={docsPercent} color={docsPercent >= 80 ? "bg-teal" : "bg-amber"} className="mt-3" size="sm" />
+          <p className="text-xs text-muted-foreground mt-2">
             {docsPercent >= 100 ? "All complete" : `${docsPercent}% complete`}
           </p>
         </Card>
 
-        <Card>
-          <CardTitle>Insurance Coverage</CardTitle>
+        <Card className="card-hover">
+          <div className="flex items-center justify-between">
+            <CardTitle>Insurance Coverage</CardTitle>
+            <ShieldCheck className="w-4 h-4 text-muted-foreground" />
+          </div>
           <p className={`text-2xl font-bold mt-2 ${hasAdequateInsurance ? "text-teal" : "text-coral"}`}>
             {coveragePercent}%
           </p>
-          <ProgressBar value={coveragePercent} color={hasAdequateInsurance ? "bg-teal" : "bg-coral"} className="mt-2" size="sm" />
-          <p className="text-xs text-muted-foreground mt-1">
+          <ProgressBar value={coveragePercent} color={hasAdequateInsurance ? "bg-teal" : "bg-coral"} className="mt-3" size="sm" />
+          <p className="text-xs text-muted-foreground mt-2">
             {formatCurrency(lifeCoverage)} of {formatCurrency(recommendedCoverage)}
           </p>
         </Card>
 
-        <Card>
-          <CardTitle>Emergency Contacts</CardTitle>
+        <Card className="card-hover">
+          <div className="flex items-center justify-between">
+            <CardTitle>Emergency Contacts</CardTitle>
+            <Users className="w-4 h-4 text-muted-foreground" />
+          </div>
           <p className="text-2xl font-bold text-foreground mt-2">{filledContacts}/{totalContacts}</p>
           <ProgressBar
             value={totalContacts > 0 ? (filledContacts / totalContacts) * 100 : 0}
             color="bg-navy"
-            className="mt-2"
+            className="mt-3"
             size="sm"
           />
-          <p className="text-xs text-muted-foreground mt-1">contacts filled in</p>
+          <p className="text-xs text-muted-foreground mt-2">contacts filled in</p>
         </Card>
 
-        <Card>
-          <CardTitle>Action Plan</CardTitle>
+        <Card className="card-hover">
+          <div className="flex items-center justify-between">
+            <CardTitle>Action Plan</CardTitle>
+            <ListChecks className="w-4 h-4 text-muted-foreground" />
+          </div>
           <p className="text-2xl font-bold text-foreground mt-2">{completedActions}/{totalActions}</p>
-          <ProgressBar value={actionsPercent} color="bg-teal" className="mt-2" size="sm" />
-          <p className="text-xs text-muted-foreground mt-1">{actionsPercent}% complete</p>
+          <ProgressBar value={actionsPercent} color="bg-teal" className="mt-3" size="sm" />
+          <p className="text-xs text-muted-foreground mt-2">{actionsPercent}% complete</p>
         </Card>
       </div>
 
       {/* Alerts */}
       <div className="space-y-3">
         {!hasAdequateInsurance && (
-          <div className="flex items-start gap-3 bg-coral/10 border border-coral/20 rounded-lg p-4">
+          <div className="flex items-start gap-3 glass rounded-2xl p-4 border-coral/30 bg-coral/[0.06]">
             <AlertTriangle className="w-5 h-5 text-coral shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-semibold text-coral">
                 Life Insurance Gap: {formatCurrency(recommendedCoverage - lifeCoverage)}
               </p>
-              <p className="text-xs text-coral/80 mt-0.5">
+              <p className="text-xs text-muted-foreground mt-0.5">
                 Current: {formatCurrency(lifeCoverage)}. Recommended: {formatCurrency(recommendedCoverage)}.
               </p>
-              <Link href="/insurance" className="text-xs text-coral font-medium hover:underline mt-1 inline-block">
+              <Link href="/insurance" className="text-xs text-coral font-medium hover:underline mt-1.5 inline-block">
                 View Insurance Analysis →
               </Link>
             </div>
@@ -199,14 +223,14 @@ export default function DashboardPage() {
         )}
 
         {docsPercent < 50 && (
-          <div className="flex items-start gap-3 bg-amber/10 border border-amber/20 rounded-lg p-4">
+          <div className="flex items-start gap-3 glass rounded-2xl p-4 border-amber/30 bg-amber/[0.06]">
             <AlertTriangle className="w-5 h-5 text-amber shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-semibold text-amber">Estate Plan Incomplete</p>
-              <p className="text-xs text-amber/80 mt-0.5">
+              <p className="text-xs text-muted-foreground mt-0.5">
                 {completedDocs}/{totalDocs} documents complete. Will, trust, and POA still needed.
               </p>
-              <Link href="/binder" className="text-xs text-amber font-medium hover:underline mt-1 inline-block">
+              <Link href="/binder" className="text-xs text-amber font-medium hover:underline mt-1.5 inline-block">
                 Open Emergency Binder →
               </Link>
             </div>
@@ -220,48 +244,31 @@ export default function DashboardPage() {
         <Card>
           <div className="flex items-center justify-between mb-4">
             <CardTitle>Emergency Binder Status</CardTitle>
-            <Link href="/binder" className="text-xs text-navy hover:underline">
+            <Link href="/binder" className="text-xs text-teal hover:text-teal-light transition">
               Open Binder
             </Link>
           </div>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm text-foreground">Contacts</span>
+          <div className="space-y-1">
+            {[
+              { icon: Users, label: "Contacts", value: `${filledContacts} filled`, tone: "text-foreground" },
+              { icon: FileText, label: "Legal Documents", value: `${completedDocs}/${totalDocs} complete`, tone: docsPercent >= 80 ? "text-teal" : "text-amber" },
+              { icon: ShieldCheck, label: "Insurance Policies", value: `${insurancePolicies.length} tracked`, tone: "text-foreground" },
+              { icon: Receipt, label: "Monthly Bills", value: `${totalBills} tracked`, tone: "text-foreground" },
+              { icon: KeyRound, label: "Digital Access", value: `${digitalItems} items`, tone: "text-foreground" },
+            ].map((row) => (
+              <div
+                key={row.label}
+                className="flex items-center justify-between py-2.5 border-b border-border last:border-0"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-white/[0.04]">
+                    <row.icon className="w-4 h-4 text-muted-foreground" />
+                  </span>
+                  <span className="text-sm text-foreground">{row.label}</span>
+                </div>
+                <span className={`text-sm font-medium ${row.tone}`}>{row.value}</span>
               </div>
-              <span className="text-sm font-medium text-foreground">{filledContacts} filled</span>
-            </div>
-            <div className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm text-foreground">Legal Documents</span>
-              </div>
-              <span className={`text-sm font-medium ${docsPercent >= 80 ? "text-teal" : "text-amber"}`}>
-                {completedDocs}/{totalDocs} complete
-              </span>
-            </div>
-            <div className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm text-foreground">Insurance Policies</span>
-              </div>
-              <span className="text-sm font-medium text-foreground">{insurancePolicies.length} tracked</span>
-            </div>
-            <div className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-2">
-                <Receipt className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm text-foreground">Monthly Bills</span>
-              </div>
-              <span className="text-sm font-medium text-foreground">{totalBills} tracked</span>
-            </div>
-            <div className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-2">
-                <KeyRound className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm text-foreground">Digital Access</span>
-              </div>
-              <span className="text-sm font-medium text-foreground">{digitalItems} items</span>
-            </div>
+            ))}
           </div>
         </Card>
 
@@ -269,7 +276,7 @@ export default function DashboardPage() {
         <Card>
           <div className="flex items-center justify-between mb-4">
             <CardTitle>Next Steps</CardTitle>
-            <Link href="/action-plan" className="text-xs text-navy hover:underline">
+            <Link href="/action-plan" className="text-xs text-teal hover:text-teal-light transition">
               View All
             </Link>
           </div>
@@ -280,8 +287,8 @@ export default function DashboardPage() {
               .map((item) => (
                 <div key={item.id} className="flex items-start gap-3">
                   <div
-                    className="w-2 h-2 rounded-full mt-1.5 shrink-0"
-                    style={{ backgroundColor: getPhaseColor(item.phase) }}
+                    className="w-2 h-2 rounded-full mt-1.5 shrink-0 shadow-[0_0_8px_currentColor]"
+                    style={{ backgroundColor: getPhaseColor(item.phase), color: getPhaseColor(item.phase) }}
                   />
                   <div>
                     <p className="text-sm text-foreground">{item.title}</p>
@@ -307,12 +314,7 @@ export default function DashboardPage() {
                 {completedActions}/{totalActions} actions complete
               </span>
             </div>
-            <ProgressBar
-              value={actionsPercent}
-              color="bg-teal"
-              size="sm"
-              className="mt-2"
-            />
+            <ProgressBar value={actionsPercent} color="bg-teal" size="sm" className="mt-2" />
           </div>
         </Card>
       </div>
@@ -325,12 +327,12 @@ export default function DashboardPage() {
             <Link
               key={link.href}
               href={link.href}
-              className="flex items-center gap-3 bg-card border border-border rounded-xl p-4 hover:bg-surface-hover transition group"
+              className="glass card-hover rounded-2xl p-4 flex items-center gap-3 group"
             >
-              <link.icon className={`w-5 h-5 ${link.color}`} />
-              <span className="text-sm font-medium text-foreground group-hover:text-navy transition">
-                {link.label}
+              <span className="flex items-center justify-center w-9 h-9 rounded-xl bg-white/[0.04] group-hover:accent-soft transition">
+                <link.icon className={`w-5 h-5 ${link.color}`} />
               </span>
+              <span className="text-sm font-medium text-foreground">{link.label}</span>
             </Link>
           ))}
         </div>

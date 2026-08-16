@@ -18,6 +18,7 @@ import type {
   Household,
   HouseholdInvite,
 } from "@/lib/types";
+import { INSURANCE_DEFAULTS, inputsFromRow, type InsuranceInputs } from "@/lib/insurance";
 
 // Generic hook for any table
 function useSupabaseTable<T>(
@@ -74,11 +75,21 @@ function useSupabaseTable<T>(
       prev.map((item) => ((item as Record<string, unknown>).id === id ? { ...item, ...updates } : item))
     );
     const supabase = createClient();
-    const { error } = await supabase.from(table).update(updates).eq("id", id);
+    // count: "exact" is what catches a write that RLS rejected — PostgREST
+    // reports no error for those, it just matches zero rows, so without the
+    // count the optimistic UI would show a change that never persisted.
+    const { error, count } = await supabase
+      .from(table)
+      .update(updates, { count: "exact" })
+      .eq("id", id);
     if (error) {
       // Revert on error
       fetchData();
       throw error;
+    }
+    if (count === 0) {
+      fetchData();
+      throw new Error(`Update to ${table} affected no rows (id ${id}) — check permissions.`);
     }
   };
 
@@ -302,6 +313,35 @@ export function useHousehold() {
   };
 
   return { household, members, invites, loading, sendInvite, revokeInvite, refetch: fetchHousehold };
+}
+
+// Insurance calculator hook — loads the household's saved inputs (or defaults)
+export function useInsuranceCalculator() {
+  const [inputs, setInputs] = useState<InsuranceInputs>(INSURANCE_DEFAULTS);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const supabase = createClient();
+        const { data } = await supabase
+          .from("insurance_calculator")
+          .select("*")
+          .maybeSingle();
+        if (active && data) setInputs(inputsFromRow(data));
+      } catch {
+        // keep defaults
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  return { inputs, loading };
 }
 
 // Profile hook

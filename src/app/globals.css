@@ -11,7 +11,7 @@
   --color-card: var(--card-bg);
   --color-card-foreground: var(--card-fg);
 
-  /* Brand colors — adaptive to light/dark */
+  /* Brand colors — vibrant, adaptive to light/dark */
   --color-navy: var(--navy);
   --color-navy-light: var(--navy-light);
   --color-navy-dark: var(--navy-dark);
@@ -32,58 +32,75 @@
   --font-mono: var(--font-geist-mono);
 }
 
-/* ── Light mode ───────────────────────────── */
-:root {
-  --background: #FAF9F7;
-  --foreground: #1C1917;
-  --surface: #FFFFFF;
-  --surface-hover: #F5F3EF;
-  --border-color: #E7E5E0;
-  --muted-color: #ADA99F;
-  --muted-fg: #6B6860;
-  --card-bg: #FFFFFF;
-  --card-fg: #1C1917;
+/* ── Dark mode (the showcase / default) ───────── */
+:root,
+.dark {
+  --background: #08090D;
+  --foreground: #ECEEF3;
+  --surface: #111319;
+  --surface-hover: #1A1D26;
+  --border-color: rgba(255, 255, 255, 0.08);
+  --muted-color: #4A4E5A;
+  --muted-fg: #8B90A0;
 
-  --navy: #344E6A;
-  --navy-light: #456282;
-  --navy-dark: #1B2A3D;
-  --teal: #3B7D62;
-  --teal-light: #4E9E7E;
-  --amber: #B8922E;
-  --amber-light: #D0AB48;
-  --coral: #B85450;
-  --coral-light: #CF6E6A;
+  /* Glassy card: translucent over the dark canvas */
+  --card-bg: rgba(255, 255, 255, 0.035);
+  --card-fg: #ECEEF3;
 
-  --sidebar: #1B2A3D;
-  --primary: #344E6A;
-  --primary-hover: #456282;
+  /* Electric, high-contrast accents */
+  --navy: #5B8DEF;        /* electric blue */
+  --navy-light: #7CA6F5;
+  --navy-dark: #3E6FD4;
+  --teal: #2EE6C5;        /* neon teal — primary accent */
+  --teal-light: #5FF0D6;
+  --amber: #F5C451;
+  --amber-light: #FFD978;
+  --coral: #FB7185;
+  --coral-light: #FF94A6;
+
+  --sidebar: rgba(13, 15, 20, 0.72);
+  --primary: #2EE6C5;
+  --primary-hover: #5FF0D6;
+
+  /* Near-opaque nav surface — content must not bleed through nav bars/menus */
+  --nav-bg: rgba(13, 15, 21, 0.92);
+
+  --glow: 0 0 0 1px rgba(46, 230, 197, 0.0), 0 8px 40px -12px rgba(46, 230, 197, 0.35);
+  --accent-rgb: 46, 230, 197;
 }
 
-/* ── Dark mode ────────────────────────────── */
-.dark {
-  --background: #0E0E0D;
-  --foreground: #E8E6E3;
-  --surface: #1A1918;
-  --surface-hover: #262524;
-  --border-color: #2C2B29;
-  --muted-color: #555350;
-  --muted-fg: #9C9A95;
-  --card-bg: #1A1918;
-  --card-fg: #E8E6E3;
+/* ── Light mode (kept coherent, same vibrant accents) ── */
+.light {
+  --background: #F6F7F9;
+  --foreground: #0E1117;
+  --surface: #FFFFFF;
+  --surface-hover: #EEF0F4;
+  --border-color: rgba(10, 15, 30, 0.08);
+  --muted-color: #B6BAC5;
+  --muted-fg: #5A6072;
 
-  --navy: #8AAAC6;
-  --navy-light: #A0BDD6;
-  --navy-dark: #6B8DAD;
-  --teal: #5EAA8A;
-  --teal-light: #7CC4A4;
-  --amber: #D4B45A;
-  --amber-light: #E2C874;
-  --coral: #D8807A;
-  --coral-light: #E8A09A;
+  --card-bg: rgba(255, 255, 255, 0.85);
+  --card-fg: #0E1117;
 
-  --sidebar: #141413;
-  --primary: #456282;
-  --primary-hover: #5A7A9A;
+  --navy: #2C66E0;
+  --navy-light: #4A82F0;
+  --navy-dark: #1B4FC4;
+  --teal: #0EA98C;
+  --teal-light: #14C7A4;
+  --amber: #C9912A;
+  --amber-light: #E0AE48;
+  --coral: #E04860;
+  --coral-light: #F0697E;
+
+  --sidebar: rgba(255, 255, 255, 0.72);
+  --primary: #0EA98C;
+  --primary-hover: #14C7A4;
+
+  /* Near-opaque nav surface for light mode */
+  --nav-bg: rgba(255, 255, 255, 0.94);
+
+  --glow: 0 8px 30px -12px rgba(14, 169, 140, 0.25);
+  --accent-rgb: 14, 169, 140;
 }
 
 html, body {
@@ -96,6 +113,75 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
   -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+
+/* Ambient glow background — subtle aurora behind the dark canvas */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(60rem 40rem at 12% -10%, rgba(46, 230, 197, 0.10), transparent 60%),
+    radial-gradient(50rem 40rem at 100% 0%, rgba(91, 141, 239, 0.10), transparent 55%),
+    radial-gradient(50rem 50rem at 50% 120%, rgba(91, 141, 239, 0.06), transparent 60%);
+}
+.light body::before {
+  background:
+    radial-gradient(60rem 40rem at 12% -10%, rgba(14, 169, 140, 0.08), transparent 60%),
+    radial-gradient(50rem 40rem at 100% 0%, rgba(44, 102, 224, 0.07), transparent 55%);
+}
+
+/* ── Reusable surface utilities ──────────────── */
+
+/* Frosted-glass panel */
+.glass {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+/* Near-opaque nav surface — for sidebars, headers, menus, and floating bars
+   where background content must NOT bleed through (even without blur support). */
+.glass-nav {
+  background: var(--nav-bg);
+  border-color: var(--border-color);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: blur(20px) saturate(140%);
+}
+
+/* Accent glow ring/shadow */
+.glow-accent {
+  box-shadow: var(--glow);
+}
+
+/* Gradient text in the accent */
+.text-gradient {
+  background: linear-gradient(100deg, var(--teal), var(--navy));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Hover lift for interactive cards */
+.card-hover {
+  transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  border-color: rgba(var(--accent-rgb), 0.35);
+  box-shadow: 0 12px 40px -16px rgba(var(--accent-rgb), 0.45);
+}
+
+/* Accent-tinted soft fill (badges, pills, icon chips) */
+.accent-soft {
+  background: rgba(var(--accent-rgb), 0.12);
+  color: var(--teal);
+  border: 1px solid rgba(var(--accent-rgb), 0.22);
 }
 
 /* Scrollbar styling */
@@ -103,16 +189,13 @@ body {
   width: 6px;
   height: 6px;
 }
-
 ::-webkit-scrollbar-track {
   background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
   background: var(--muted-color);
   border-radius: 3px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
   background: var(--muted-fg);
 }
@@ -127,8 +210,8 @@ body {
   }
 }
 
-/* Phase colors — mid-tone for both modes */
-.phase-1 { --phase-color: #B85450; }
-.phase-2 { --phase-color: #B8922E; }
-.phase-3 { --phase-color: #3B7D62; }
-.phase-4 { --phase-color: #456282; }
+/* Phase colors — vibrant for both modes */
+.phase-1 { --phase-color: #FB7185; }
+.phase-2 { --phase-color: #F5C451; }
+.phase-3 { --phase-color: #2EE6C5; }
+.phase-4 { --phase-color: #5B8DEF; }

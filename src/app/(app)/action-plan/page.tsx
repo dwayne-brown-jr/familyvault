@@ -27,9 +27,9 @@ type Status = "not_started" | "in_progress" | "complete";
 const STATUS_CYCLE: Status[] = ["not_started", "in_progress", "complete"];
 
 const STATUS_CONFIG: Record<Status, { label: string; icon: typeof Circle; className: string }> = {
-  not_started: { label: "Not Started", icon: Circle, className: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400" },
-  in_progress: { label: "In Progress", icon: Clock, className: "bg-amber/15 text-amber" },
-  complete: { label: "Complete", icon: CheckCircle2, className: "bg-teal/15 text-teal" },
+  not_started: { label: "Not Started", icon: Circle, className: "bg-white/[0.05] text-muted-foreground border border-border" },
+  in_progress: { label: "In Progress", icon: Clock, className: "bg-amber/15 text-amber border border-amber/25" },
+  complete: { label: "Complete", icon: CheckCircle2, className: "bg-teal/15 text-teal border border-teal/25" },
 };
 
 const PHASE_COLORS: Record<number, string> = {
@@ -40,7 +40,7 @@ const PHASE_COLORS: Record<number, string> = {
 };
 
 const inputClass =
-  "bg-surface border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 w-full";
+  "bg-white/[0.04] border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent w-full";
 
 interface NewItemForm {
   title: string;
@@ -59,7 +59,7 @@ const emptyForm: NewItemForm = {
 };
 
 export default function ActionPlanPage() {
-  const { data: items, loading, update, insert, remove } = useActionItems();
+  const { data: items, loading, update, insert, remove, refetch } = useActionItems();
   const [expandedPhases, setExpandedPhases] = useState<Set<number>>(new Set([1, 2, 3, 4]));
   const [showAddForm, setShowAddForm] = useState(false);
   const [addForm, setAddForm] = useState<NewItemForm>(emptyForm);
@@ -73,6 +73,8 @@ export default function ActionPlanPage() {
   }>({ title: "", description: "", target_date: "", notes: "" });
   const [savingEdit, setSavingEdit] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [seeding, setSeeding] = useState(false);
+  const [seedError, setSeedError] = useState<string | null>(null);
 
   const phases = [1, 2, 3, 4] as const;
 
@@ -105,11 +107,11 @@ export default function ActionPlanPage() {
     return (
       <div className="space-y-6 max-w-7xl mx-auto">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Action Plan</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Action Plan</h1>
           <p className="text-muted-foreground text-sm mt-1">Loading...</p>
         </div>
         <Card>
-          <div className="h-32 animate-pulse bg-surface-hover rounded" />
+          <div className="h-32 animate-pulse bg-white/10 rounded-xl" />
         </Card>
       </div>
     );
@@ -196,17 +198,38 @@ export default function ActionPlanPage() {
     }
   };
 
+  const loadStarterPlan = async () => {
+    setSeeding(true);
+    setSeedError(null);
+    try {
+      const res = await fetch("/api/seed", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tables: ["action_items"] }),
+      });
+      const result = await res.json();
+      if (!res.ok) {
+        throw new Error(result.errors?.action_items || result.error || "Request failed");
+      }
+      await refetch();
+    } catch (err) {
+      setSeedError(err instanceof Error ? err.message : "Could not load the starter plan.");
+    } finally {
+      setSeeding(false);
+    }
+  };
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Action Plan</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Action Plan</h1>
           <p className="text-muted-foreground text-sm mt-1">Your financial roadmap — phase by phase</p>
         </div>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition"
+          className="flex items-center gap-2 bg-teal text-[#08090D] px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-light transition"
         >
           <Plus className="w-4 h-4" />
           Add Task
@@ -275,7 +298,7 @@ export default function ActionPlanPage() {
             <button
               onClick={handleAddItem}
               disabled={!addForm.title.trim() || addingItem}
-              className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition disabled:opacity-50"
+              className="flex items-center gap-2 bg-teal text-[#08090D] px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-light transition disabled:opacity-50"
             >
               {addingItem ? "Adding..." : "Add Item"}
             </button>
@@ -284,7 +307,7 @@ export default function ActionPlanPage() {
                 setShowAddForm(false);
                 setAddForm(emptyForm);
               }}
-              className="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground transition"
+              className="px-4 py-2 rounded-lg text-sm font-medium bg-white/[0.05] text-foreground hover:bg-white/[0.08] border border-border transition"
             >
               Cancel
             </button>
@@ -292,284 +315,315 @@ export default function ActionPlanPage() {
         </Card>
       )}
 
-      {/* Overall progress */}
-      <Card>
-        <div className="flex items-center justify-between mb-3">
-          <CardTitle>Overall Progress</CardTitle>
-          <span className="text-sm font-bold text-foreground">
-            {overallCompleted}/{items.length} complete
-          </span>
-        </div>
-        <ProgressBar value={overallPercent} color="bg-teal" size="lg" />
-        <p className="text-xs text-muted-foreground mt-2">
-          {Math.round(overallPercent)}% of your financial plan is complete
-        </p>
-
-        {/* Phase summary row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
-          {phases.map((phase) => (
-            <div
-              key={phase}
-              className="rounded-lg p-3 border border-border"
-              style={{ borderLeftWidth: 3, borderLeftColor: PHASE_COLORS[phase] }}
-            >
-              <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: PHASE_COLORS[phase] }}>
-                Phase {phase}
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">{getPhaseLabel(phase)}</p>
-              <div className="flex items-center gap-2 mt-2">
-                <ProgressBar
-                  value={phaseProgress[phase].percent}
-                  color={`bg-[${PHASE_COLORS[phase]}]`}
-                  size="sm"
-                  className="flex-1"
-                />
-                <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">
-                  {phaseProgress[phase].completed}/{phaseProgress[phase].total}
-                </span>
-              </div>
+      {items.length === 0 ? (
+        /* Empty state — this household has no action items yet */
+        <Card className="text-center py-10">
+          <div className="accent-soft mx-auto flex h-12 w-12 items-center justify-center rounded-xl">
+            <Target className="h-6 w-6 text-teal" />
+          </div>
+          <h2 className="text-lg font-semibold text-foreground mt-4">No action items yet</h2>
+          <p className="text-sm text-muted-foreground mt-1 max-w-md mx-auto">
+            Add your own tasks with the button above, or start from the built-in 21-step plan
+            covering protection, estate documents, investing, and long-term goals.
+          </p>
+          <button
+            onClick={loadStarterPlan}
+            disabled={seeding}
+            className="mt-5 inline-flex items-center gap-2 bg-teal text-[#08090D] px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-light transition disabled:opacity-50"
+          >
+            <Plus className="w-4 h-4" />
+            {seeding ? "Loading…" : "Load starter plan"}
+          </button>
+          {seedError && <p className="text-xs text-coral mt-3">{seedError}</p>}
+        </Card>
+      ) : (
+        <>
+          {/* Overall progress */}
+          <Card>
+            <div className="flex items-center justify-between mb-3">
+              <CardTitle>Overall Progress</CardTitle>
+              <span className="text-sm font-bold text-foreground">
+                {overallCompleted}/{items.length} complete
+              </span>
             </div>
-          ))}
-        </div>
-      </Card>
+            <ProgressBar value={overallPercent} color="bg-teal" size="lg" />
+            <p className="text-xs text-muted-foreground mt-2">
+              {Math.round(overallPercent)}% of your financial plan is complete
+            </p>
 
-      {/* Timeline / Phase Sections */}
-      <div className="space-y-4">
-        {phases.map((phase) => {
-          const isExpanded = expandedPhases.has(phase);
-          const progress = phaseProgress[phase];
-          const color = PHASE_COLORS[phase];
-
-          return (
-            <Card key={phase} className="overflow-hidden p-0">
-              {/* Phase header */}
-              <button
-                onClick={() => togglePhase(phase)}
-                className="w-full flex items-center gap-4 p-5 hover:bg-surface-hover transition text-left"
-              >
-                {/* Color indicator */}
+            {/* Phase summary row */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+              {phases.map((phase) => (
                 <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-white font-bold text-sm"
-                  style={{ backgroundColor: color }}
+                  key={phase}
+                  className="glass rounded-2xl p-3"
+                  style={{ borderLeftWidth: 3, borderLeftColor: PHASE_COLORS[phase] }}
                 >
-                  {phase}
+                  <p className="text-xs font-semibold" style={{ color: PHASE_COLORS[phase] }}>
+                    Phase {phase}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{getPhaseLabel(phase)}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <ProgressBar
+                      value={phaseProgress[phase].percent}
+                      color={`bg-[${PHASE_COLORS[phase]}]`}
+                      size="sm"
+                      className="flex-1"
+                    />
+                    <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">
+                      {phaseProgress[phase].completed}/{phaseProgress[phase].total}
+                    </span>
+                  </div>
                 </div>
+              ))}
+            </div>
+          </Card>
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-lg font-bold text-foreground">{getPhaseLabel(phase)}</h2>
-                    <span
-                      className="text-xs font-semibold px-2 py-0.5 rounded-full"
-                      style={{ backgroundColor: `${color}20`, color }}
+          {/* Timeline / Phase Sections */}
+          <div className="space-y-4">
+            {phases.map((phase) => {
+              const isExpanded = expandedPhases.has(phase);
+              const progress = phaseProgress[phase];
+              const color = PHASE_COLORS[phase];
+
+              return (
+                <Card key={phase} className="overflow-hidden p-0">
+                  {/* Phase header */}
+                  <button
+                    onClick={() => togglePhase(phase)}
+                    className="w-full flex items-center gap-4 p-5 hover:bg-white/[0.03] transition text-left"
+                  >
+                    {/* Color indicator */}
+                    <div
+                      className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-white font-bold text-sm"
+                      style={{ backgroundColor: color, boxShadow: `0 0 12px ${color}` }}
                     >
-                      Phase {phase}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 mt-1">
-                    <ProgressBar value={progress.percent} size="sm" className="flex-1 max-w-48" />
-                    <span className="text-xs text-muted-foreground">
-                      {progress.completed}/{progress.total} complete
-                    </span>
-                  </div>
-                </div>
+                      {phase}
+                    </div>
 
-                {isExpanded ? (
-                  <ChevronDown className="w-5 h-5 text-muted-foreground shrink-0" />
-                ) : (
-                  <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />
-                )}
-              </button>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-lg font-semibold text-foreground">{getPhaseLabel(phase)}</h2>
+                        <span
+                          className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                          style={{ backgroundColor: `${color}20`, color }}
+                        >
+                          Phase {phase}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 mt-1">
+                        <ProgressBar value={progress.percent} size="sm" className="flex-1 max-w-48" />
+                        <span className="text-xs text-muted-foreground">
+                          {progress.completed}/{progress.total} complete
+                        </span>
+                      </div>
+                    </div>
 
-              {/* Action items */}
-              {isExpanded && (
-                <div className="border-t border-border">
-                  {phaseItems[phase].length === 0 && (
-                    <div className="p-5 text-sm text-muted-foreground text-center">
-                      No action items in this phase yet.
+                    {isExpanded ? (
+                      <ChevronDown className="w-5 h-5 text-muted-foreground shrink-0" />
+                    ) : (
+                      <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />
+                    )}
+                  </button>
+
+                  {/* Action items */}
+                  {isExpanded && (
+                    <div className="border-t border-border">
+                      {phaseItems[phase].length === 0 && (
+                        <div className="p-5 text-sm text-muted-foreground text-center">
+                          No action items in this phase yet.
+                        </div>
+                      )}
+                      {phaseItems[phase].map((item, idx) => {
+                        const status = item.status as Status;
+                        const config = STATUS_CONFIG[status];
+                        const StatusIcon = config.icon;
+                        const isEditing = editingId === item.id;
+                        const isDeleting = deletingId === item.id;
+
+                        return (
+                          <div
+                            key={item.id}
+                            className={cn(
+                              "group flex items-start gap-4 p-5 transition hover:bg-white/[0.03]",
+                              idx < phaseItems[phase].length - 1 && "border-b border-border"
+                            )}
+                          >
+                            {/* Timeline dot */}
+                            <div className="relative flex flex-col items-center pt-1">
+                              <div
+                                className="w-3 h-3 rounded-full shrink-0"
+                                style={{
+                                  backgroundColor:
+                                    status === "complete"
+                                      ? "#3B7D62"
+                                      : status === "in_progress"
+                                      ? "#B8922E"
+                                      : `${color}40`,
+                                  boxShadow:
+                                    status === "complete"
+                                      ? "0 0 8px #3B7D62"
+                                      : status === "in_progress"
+                                      ? "0 0 8px #B8922E"
+                                      : `0 0 8px ${color}40`,
+                                }}
+                              />
+                              {idx < phaseItems[phase].length - 1 && (
+                                <div className="w-px flex-1 bg-border mt-2 min-h-[20px]" />
+                              )}
+                            </div>
+
+                            {/* Content */}
+                            <div className="flex-1 min-w-0">
+                              {isEditing ? (
+                                /* Edit mode */
+                                <div className="space-y-3">
+                                  <div>
+                                    <label className="block text-xs font-medium text-muted-foreground mb-1">Title</label>
+                                    <input
+                                      type="text"
+                                      value={editForm.title}
+                                      onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))}
+                                      className={inputClass}
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-xs font-medium text-muted-foreground mb-1">Description</label>
+                                    <input
+                                      type="text"
+                                      value={editForm.description}
+                                      onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
+                                      placeholder="Optional description..."
+                                      className={inputClass}
+                                    />
+                                  </div>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <div>
+                                      <label className="block text-xs font-medium text-muted-foreground mb-1">Target Date</label>
+                                      <input
+                                        type="date"
+                                        value={editForm.target_date}
+                                        onChange={(e) => setEditForm((f) => ({ ...f, target_date: e.target.value }))}
+                                        className={inputClass}
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs font-medium text-muted-foreground mb-1">Notes</label>
+                                      <input
+                                        type="text"
+                                        value={editForm.notes}
+                                        onChange={(e) => setEditForm((f) => ({ ...f, notes: e.target.value }))}
+                                        placeholder="Optional notes..."
+                                        className={inputClass}
+                                      />
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      onClick={() => saveEdit(item.id)}
+                                      disabled={!editForm.title.trim() || savingEdit}
+                                      className="flex items-center gap-1.5 bg-teal text-[#08090D] px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-teal-light transition disabled:opacity-50"
+                                    >
+                                      <Check className="w-3.5 h-3.5" />
+                                      {savingEdit ? "Saving..." : "Save"}
+                                    </button>
+                                    <button
+                                      onClick={cancelEditing}
+                                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/[0.05] text-foreground hover:bg-white/[0.08] border border-border transition"
+                                    >
+                                      <X className="w-3.5 h-3.5" />
+                                      Cancel
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                /* View mode */
+                                <>
+                                  <div className="flex items-start justify-between gap-3">
+                                    <div className="flex-1 min-w-0">
+                                      <p
+                                        className={cn(
+                                          "font-medium text-foreground",
+                                          status === "complete" && "line-through text-muted-foreground"
+                                        )}
+                                      >
+                                        {item.title}
+                                      </p>
+                                      {item.description && (
+                                        <p className="text-sm text-muted-foreground mt-0.5">{item.description}</p>
+                                      )}
+                                    </div>
+
+                                    <div className="flex items-center gap-2 shrink-0">
+                                      {/* Edit button */}
+                                      <button
+                                        onClick={() => startEditing(item)}
+                                        className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-white/[0.06] transition"
+                                        title="Edit item"
+                                      >
+                                        <Pencil className="w-3.5 h-3.5" />
+                                      </button>
+
+                                      {/* Delete button */}
+                                      <button
+                                        onClick={() => handleDelete(item.id)}
+                                        disabled={isDeleting}
+                                        className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md text-muted-foreground hover:text-coral hover:bg-coral/10 transition disabled:opacity-50"
+                                        title="Delete item"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
+
+                                      {/* Status badge */}
+                                      <button
+                                        onClick={() => cycleStatus(item.id)}
+                                        className={cn(
+                                          "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium shrink-0 transition hover:opacity-80",
+                                          config.className
+                                        )}
+                                      >
+                                        <StatusIcon className="w-3.5 h-3.5" />
+                                        {config.label}
+                                      </button>
+                                    </div>
+                                  </div>
+
+                                  {/* Meta row */}
+                                  <div className="flex items-center gap-4 mt-2">
+                                    {item.target_date && (
+                                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                        <CalendarDays className="w-3.5 h-3.5" />
+                                        <span>
+                                          Target:{" "}
+                                          {new Date(item.target_date).toLocaleDateString("en-US", {
+                                            month: "short",
+                                            day: "numeric",
+                                            year: "numeric",
+                                          })}
+                                        </span>
+                                      </div>
+                                    )}
+                                    {item.notes && (
+                                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                        <StickyNote className="w-3.5 h-3.5" />
+                                        <span>{item.notes}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
-                  {phaseItems[phase].map((item, idx) => {
-                    const status = item.status as Status;
-                    const config = STATUS_CONFIG[status];
-                    const StatusIcon = config.icon;
-                    const isEditing = editingId === item.id;
-                    const isDeleting = deletingId === item.id;
-
-                    return (
-                      <div
-                        key={item.id}
-                        className={cn(
-                          "group flex items-start gap-4 p-5",
-                          idx < phaseItems[phase].length - 1 && "border-b border-border"
-                        )}
-                      >
-                        {/* Timeline dot */}
-                        <div className="relative flex flex-col items-center pt-1">
-                          <div
-                            className="w-3 h-3 rounded-full shrink-0"
-                            style={{
-                              backgroundColor:
-                                status === "complete"
-                                  ? "#3B7D62"
-                                  : status === "in_progress"
-                                  ? "#B8922E"
-                                  : `${color}40`,
-                            }}
-                          />
-                          {idx < phaseItems[phase].length - 1 && (
-                            <div className="w-px flex-1 bg-border mt-2 min-h-[20px]" />
-                          )}
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          {isEditing ? (
-                            /* Edit mode */
-                            <div className="space-y-3">
-                              <div>
-                                <label className="block text-xs font-medium text-muted-foreground mb-1">Title</label>
-                                <input
-                                  type="text"
-                                  value={editForm.title}
-                                  onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))}
-                                  className={inputClass}
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-xs font-medium text-muted-foreground mb-1">Description</label>
-                                <input
-                                  type="text"
-                                  value={editForm.description}
-                                  onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
-                                  placeholder="Optional description..."
-                                  className={inputClass}
-                                />
-                              </div>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <div>
-                                  <label className="block text-xs font-medium text-muted-foreground mb-1">Target Date</label>
-                                  <input
-                                    type="date"
-                                    value={editForm.target_date}
-                                    onChange={(e) => setEditForm((f) => ({ ...f, target_date: e.target.value }))}
-                                    className={inputClass}
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-xs font-medium text-muted-foreground mb-1">Notes</label>
-                                  <input
-                                    type="text"
-                                    value={editForm.notes}
-                                    onChange={(e) => setEditForm((f) => ({ ...f, notes: e.target.value }))}
-                                    placeholder="Optional notes..."
-                                    className={inputClass}
-                                  />
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <button
-                                  onClick={() => saveEdit(item.id)}
-                                  disabled={!editForm.title.trim() || savingEdit}
-                                  className="flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:opacity-90 transition disabled:opacity-50"
-                                >
-                                  <Check className="w-3.5 h-3.5" />
-                                  {savingEdit ? "Saving..." : "Save"}
-                                </button>
-                                <button
-                                  onClick={cancelEditing}
-                                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground transition"
-                                >
-                                  <X className="w-3.5 h-3.5" />
-                                  Cancel
-                                </button>
-                              </div>
-                            </div>
-                          ) : (
-                            /* View mode */
-                            <>
-                              <div className="flex items-start justify-between gap-3">
-                                <div className="flex-1 min-w-0">
-                                  <p
-                                    className={cn(
-                                      "font-medium text-foreground",
-                                      status === "complete" && "line-through text-muted-foreground"
-                                    )}
-                                  >
-                                    {item.title}
-                                  </p>
-                                  {item.description && (
-                                    <p className="text-sm text-muted-foreground mt-0.5">{item.description}</p>
-                                  )}
-                                </div>
-
-                                <div className="flex items-center gap-2 shrink-0">
-                                  {/* Edit button */}
-                                  <button
-                                    onClick={() => startEditing(item)}
-                                    className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-surface-hover transition"
-                                    title="Edit item"
-                                  >
-                                    <Pencil className="w-3.5 h-3.5" />
-                                  </button>
-
-                                  {/* Delete button */}
-                                  <button
-                                    onClick={() => handleDelete(item.id)}
-                                    disabled={isDeleting}
-                                    className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md text-muted-foreground hover:text-coral hover:bg-coral/10 transition disabled:opacity-50"
-                                    title="Delete item"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
-
-                                  {/* Status badge */}
-                                  <button
-                                    onClick={() => cycleStatus(item.id)}
-                                    className={cn(
-                                      "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium shrink-0 transition hover:opacity-80",
-                                      config.className
-                                    )}
-                                  >
-                                    <StatusIcon className="w-3.5 h-3.5" />
-                                    {config.label}
-                                  </button>
-                                </div>
-                              </div>
-
-                              {/* Meta row */}
-                              <div className="flex items-center gap-4 mt-2">
-                                {item.target_date && (
-                                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                    <CalendarDays className="w-3.5 h-3.5" />
-                                    <span>
-                                      Target:{" "}
-                                      {new Date(item.target_date).toLocaleDateString("en-US", {
-                                        month: "short",
-                                        day: "numeric",
-                                        year: "numeric",
-                                      })}
-                                    </span>
-                                  </div>
-                                )}
-                                {item.notes && (
-                                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                    <StickyNote className="w-3.5 h-3.5" />
-                                    <span>{item.notes}</span>
-                                  </div>
-                                )}
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </Card>
-          );
-        })}
-      </div>
+                </Card>
+              );
+            })}
+          </div>
+        </>
+      )}
 
       {/* Legend */}
       <Card>

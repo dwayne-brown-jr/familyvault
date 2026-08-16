@@ -8,7 +8,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "bg-card border border-border rounded-xl p-5",
+        "glass rounded-2xl p-5 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.5)]",
         className
       )}
       {...props}
@@ -36,7 +36,7 @@ export function CardTitle({
   children: React.ReactNode;
 }) {
   return (
-    <h3 className={cn("text-sm font-semibold text-muted-foreground uppercase tracking-wide", className)}>
+    <h3 className={cn("text-xs font-medium text-muted-foreground tracking-wide", className)}>
       {children}
     </h3>
   );

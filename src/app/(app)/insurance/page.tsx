@@ -1,48 +1,62 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { ShieldCheck, AlertTriangle, DollarSign, Users, Info, Calculator } from "lucide-react";
 import { Card, CardTitle } from "@/components/ui/card";
 import { ProgressBar } from "@/components/ui/progress-bar";
+import { SaveStatus } from "@/components/ui/save-status";
 import { formatCurrency, cn } from "@/lib/utils";
+import { useAutoSavedRow } from "@/lib/hooks/use-autosave";
+import {
+  computeInsurance,
+  inputsFromRow,
+  rowFromInputs,
+  INSURANCE_DEFAULTS,
+  type InsuranceInputs,
+} from "@/lib/insurance";
 
 export default function InsurancePage() {
-  // Input state
-  const [annualSalary, setAnnualSalary] = useState(75000);
-  const [yearsUntilChildIndependent, setYearsUntilChildIndependent] = useState(22);
-  const [numberOfChildren, setNumberOfChildren] = useState(1);
-  const [monthlyExpenses, setMonthlyExpenses] = useState(10000);
+  // Loaded from the household row, then auto-saved on every edit.
+  const { values, setValues, saveState, canSave } = useAutoSavedRow<InsuranceInputs>({
+    table: "insurance_calculator",
+    defaults: INSURANCE_DEFAULTS,
+    fromRow: inputsFromRow,
+    toRow: rowFromInputs,
+  });
 
-  // Current coverage
-  const [teslaEmployerMultiplier] = useState(2);
-  const teslaEmployerCoverage = annualSalary * teslaEmployerMultiplier;
-  const [supplementalCoverage, setSupplementalCoverage] = useState(0);
-  const [spouseCoverage, setSpouseCoverage] = useState(0);
-  const totalCurrentCoverage = teslaEmployerCoverage + supplementalCoverage + spouseCoverage;
+  const {
+    annualSalary,
+    yearsUntilChildIndependent,
+    numberOfChildren,
+    monthlyExpenses,
+    supplementalCoverage,
+    spouseCoverage,
+  } = values;
 
-  // Calculate recommended coverage
-  const recommended = useMemo(() => {
-    const incomeReplacement = annualSalary * yearsUntilChildIndependent;
-    const debtPayoff = 15000;
-    const collegePerChild = 250000;
-    const collegeFunding = collegePerChild * numberOfChildren;
-    const emergencyFund = monthlyExpenses * 12;
-    const funeralCosts = 20000;
-    const totalRecommended =
-      incomeReplacement + debtPayoff + collegeFunding + emergencyFund + funeralCosts;
+  const setAnnualSalary = (annualSalary: number) => setValues({ annualSalary });
+  const setYearsUntilChildIndependent = (yearsUntilChildIndependent: number) =>
+    setValues({ yearsUntilChildIndependent });
+  const setNumberOfChildren = (numberOfChildren: number) => setValues({ numberOfChildren });
+  const setMonthlyExpenses = (monthlyExpenses: number) => setValues({ monthlyExpenses });
+  const setSupplementalCoverage = (supplementalCoverage: number) =>
+    setValues({ supplementalCoverage });
+  const setSpouseCoverage = (spouseCoverage: number) => setValues({ spouseCoverage });
 
-    return {
-      incomeReplacement,
-      debtPayoff,
-      collegeFunding,
-      emergencyFund,
-      funeralCosts,
-      total: totalRecommended,
-    };
-  }, [annualSalary, yearsUntilChildIndependent, numberOfChildren, monthlyExpenses]);
+  // Shared calculation (identical to the Dashboard via @/lib/insurance)
+  const calc = useMemo(() => computeInsurance(values), [values]);
 
-  const gap = recommended.total - totalCurrentCoverage;
-  const coveragePercent = Math.min((totalCurrentCoverage / recommended.total) * 100, 100);
+  const teslaEmployerCoverage = calc.employerCoverage;
+  const totalCurrentCoverage = calc.currentCoverage;
+  const recommended = {
+    incomeReplacement: calc.incomeReplacement,
+    debtPayoff: calc.debtPayoff,
+    collegeFunding: calc.collegeFunding,
+    emergencyFund: calc.emergencyFund,
+    funeralCosts: calc.funeralCosts,
+    total: calc.recommendedTotal,
+  };
+  const gap = calc.gap;
+  const coveragePercent = calc.coveragePercent;
 
   // Breakdown components for the visual
   const breakdownItems = [
@@ -50,31 +64,36 @@ export default function InsurancePage() {
       label: "Income Replacement",
       amount: recommended.incomeReplacement,
       description: `${yearsUntilChildIndependent} years x ${formatCurrency(annualSalary)}/yr`,
-      color: "#344E6A",
+      color: "#2EE6C5",
+      bar: "bg-teal",
     },
     {
       label: "College Funding",
       amount: recommended.collegeFunding,
       description: `${numberOfChildren} child${numberOfChildren > 1 ? "ren" : ""} x ${formatCurrency(250000)}`,
-      color: "#456282",
+      color: "#5B8DEF",
+      bar: "bg-navy",
     },
     {
       label: "Emergency Fund",
       amount: recommended.emergencyFund,
       description: `12 months x ${formatCurrency(monthlyExpenses)}/mo`,
-      color: "#3B7D62",
+      color: "#2EE6C5",
+      bar: "bg-teal",
     },
     {
       label: "Debt Payoff",
       amount: recommended.debtPayoff,
       description: "Credit card balances",
-      color: "#B8922E",
+      color: "#F5C451",
+      bar: "bg-amber",
     },
     {
       label: "Final Expenses",
       amount: recommended.funeralCosts,
       description: "Funeral, burial, and related costs",
-      color: "#B85450",
+      color: "#FB7185",
+      bar: "bg-coral",
     },
   ];
 
@@ -105,37 +124,63 @@ export default function InsurancePage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Page header */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Insurance Gap Analyzer</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Make sure your family is fully protected if something happens
-        </p>
+      <div className="flex items-center gap-3">
+        <div className="flex items-center justify-center w-11 h-11 rounded-xl accent-soft shrink-0">
+          <ShieldCheck className="w-5 h-5 text-teal" />
+        </div>
+        <div className="flex-1">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Insurance Gap Analyzer</h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            Make sure your family is fully protected if something happens
+          </p>
+        </div>
+        <SaveStatus state={saveState} show={canSave} />
       </div>
 
       {/* Top Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
-          <CardTitle>Recommended</CardTitle>
-          <p className="text-2xl font-bold text-navy mt-2">{formatCurrency(recommended.total)}</p>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center w-9 h-9 rounded-xl accent-soft shrink-0">
+              <Calculator className="w-4 h-4 text-navy" />
+            </div>
+            <CardTitle>Recommended</CardTitle>
+          </div>
+          <p className="text-2xl font-bold text-navy mt-3">{formatCurrency(recommended.total)}</p>
           <p className="text-xs text-muted-foreground mt-1">total coverage needed</p>
         </Card>
         <Card>
-          <CardTitle>Current Coverage</CardTitle>
-          <p className="text-2xl font-bold text-foreground mt-2">{formatCurrency(totalCurrentCoverage)}</p>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-white/[0.04] shrink-0">
+              <ShieldCheck className="w-4 h-4 text-teal" />
+            </div>
+            <CardTitle>Current Coverage</CardTitle>
+          </div>
+          <p className="text-2xl font-bold text-foreground mt-3">{formatCurrency(totalCurrentCoverage)}</p>
           <p className="text-xs text-muted-foreground mt-1">
             {coveragePercent.toFixed(0)}% of recommended
           </p>
         </Card>
         <Card>
-          <CardTitle>Coverage Gap</CardTitle>
-          <p className={cn("text-2xl font-bold mt-2", gap > 0 ? "text-coral" : "text-teal")}>
+          <div className="flex items-center gap-2">
+            <div className={cn("flex items-center justify-center w-9 h-9 rounded-xl shrink-0", gap > 0 ? "bg-coral/[0.1]" : "accent-soft")}>
+              {gap > 0 ? <AlertTriangle className="w-4 h-4 text-coral" /> : <ShieldCheck className="w-4 h-4 text-teal" />}
+            </div>
+            <CardTitle>Coverage Gap</CardTitle>
+          </div>
+          <p className={cn("text-2xl font-bold mt-3", gap > 0 ? "text-coral" : "text-teal")}>
             {gap > 0 ? formatCurrency(gap) : "Fully Covered"}
           </p>
           {gap > 0 && <p className="text-xs text-coral mt-1">action needed</p>}
         </Card>
         <Card>
-          <CardTitle>Est. Monthly Premium</CardTitle>
-          <p className="text-2xl font-bold text-foreground mt-2">$50 - $120</p>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-white/[0.04] shrink-0">
+              <DollarSign className="w-4 h-4 text-amber" />
+            </div>
+            <CardTitle>Est. Monthly Premium</CardTitle>
+          </div>
+          <p className="text-2xl font-bold text-foreground mt-3">$50 - $120</p>
           <p className="text-xs text-muted-foreground mt-1">20-year term, healthy adult</p>
         </Card>
       </div>
@@ -150,16 +195,16 @@ export default function InsurancePage() {
               <span className="text-sm font-medium text-foreground">Current</span>
               <span className="text-sm text-muted-foreground">{formatCurrency(totalCurrentCoverage)}</span>
             </div>
-            <div className="w-full bg-surface-hover rounded-full h-8 overflow-hidden relative">
+            <div className="w-full bg-white/[0.06] rounded-full h-8 overflow-hidden relative">
               <div
                 className="h-full rounded-full transition-all duration-500 flex items-center justify-end pr-2"
                 style={{
                   width: `${coveragePercent}%`,
-                  backgroundColor: coveragePercent >= 80 ? "#3B7D62" : coveragePercent >= 50 ? "#B8922E" : "#B85450",
+                  backgroundColor: coveragePercent >= 80 ? "#2EE6C5" : coveragePercent >= 50 ? "#FBBF24" : "#FB7185",
                   minWidth: totalCurrentCoverage > 0 ? "60px" : "0px",
                 }}
               >
-                <span className="text-xs font-bold text-white">{coveragePercent.toFixed(0)}%</span>
+                <span className="text-xs font-bold text-[#08090D]">{coveragePercent.toFixed(0)}%</span>
               </div>
               {gap > 0 && (
                 <div
@@ -183,7 +228,7 @@ export default function InsurancePage() {
             {coverageSources.map((source) => (
               <div
                 key={source.label}
-                className="flex items-center justify-between p-3 bg-surface-hover rounded-lg"
+                className="flex items-center justify-between p-3 bg-white/[0.04] border border-border rounded-xl"
               >
                 <div>
                   <span className="text-sm font-medium text-foreground">{source.label}</span>
@@ -198,7 +243,7 @@ export default function InsurancePage() {
                       type="number"
                       value={source.amount}
                       onChange={(e) => source.setter(Number(e.target.value) || 0)}
-                      className="w-32 text-right text-sm font-semibold bg-card border border-border rounded-lg px-3 py-1.5 text-foreground"
+                      className="w-32 text-right text-sm font-semibold bg-white/[0.04] border border-border rounded-lg px-3 py-1.5 text-foreground focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
                       step={50000}
                       min={0}
                     />
@@ -226,7 +271,7 @@ export default function InsurancePage() {
                   type="number"
                   value={annualSalary}
                   onChange={(e) => setAnnualSalary(Number(e.target.value) || 0)}
-                  className="w-full text-sm bg-card border border-border rounded-lg px-3 py-2 text-foreground"
+                  className="w-full text-sm bg-white/[0.04] border border-border rounded-lg px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
                   step={5000}
                 />
               </div>
@@ -243,9 +288,9 @@ export default function InsurancePage() {
                   max={30}
                   value={yearsUntilChildIndependent}
                   onChange={(e) => setYearsUntilChildIndependent(Number(e.target.value))}
-                  className="flex-1 accent-navy h-2 rounded-full"
+                  className="flex-1 accent-teal h-2 rounded-full"
                 />
-                <span className="text-sm font-bold text-navy w-16 text-right">
+                <span className="text-sm font-bold text-teal w-16 text-right">
                   {yearsUntilChildIndependent} yrs
                 </span>
               </div>
@@ -260,9 +305,9 @@ export default function InsurancePage() {
                   max={5}
                   value={numberOfChildren}
                   onChange={(e) => setNumberOfChildren(Number(e.target.value))}
-                  className="flex-1 accent-navy h-2 rounded-full"
+                  className="flex-1 accent-teal h-2 rounded-full"
                 />
-                <span className="text-sm font-bold text-navy w-16 text-right">
+                <span className="text-sm font-bold text-teal w-16 text-right">
                   {numberOfChildren}
                 </span>
               </div>
@@ -276,7 +321,7 @@ export default function InsurancePage() {
                   type="number"
                   value={monthlyExpenses}
                   onChange={(e) => setMonthlyExpenses(Number(e.target.value) || 0)}
-                  className="w-full text-sm bg-card border border-border rounded-lg px-3 py-2 text-foreground"
+                  className="w-full text-sm bg-white/[0.04] border border-border rounded-lg px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
                   step={500}
                 />
               </div>
@@ -300,7 +345,7 @@ export default function InsurancePage() {
                     <span className="text-sm font-semibold text-foreground">{formatCurrency(item.amount)}</span>
                   </div>
                   <div className="pl-5">
-                    <ProgressBar value={pct} size="sm" />
+                    <ProgressBar value={pct} size="sm" color={item.bar} />
                     <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
                   </div>
                 </div>
@@ -317,12 +362,15 @@ export default function InsurancePage() {
 
       {/* Gap Alert or Success */}
       {gap > 0 ? (
-        <Card className="border-l-4 border-l-coral">
+        <div className="glass rounded-2xl p-5 border-coral/30 bg-coral/[0.06]">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-coral shrink-0 mt-0.5" />
+            <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-coral/[0.12] shrink-0">
+              <AlertTriangle className="w-5 h-5 text-coral" />
+            </div>
             <div>
-              <h3 className="text-sm font-semibold text-coral">
-                Coverage Gap: {formatCurrency(gap)}
+              <p className="text-xs font-medium text-muted-foreground">Coverage Gap</p>
+              <h3 className="text-2xl font-bold text-coral">
+                {formatCurrency(gap)}
               </h3>
               <p className="text-sm text-muted-foreground mt-1">
                 Your family would be underinsured by {formatCurrency(gap)} if something were to happen today.
@@ -352,26 +400,30 @@ export default function InsurancePage() {
               </div>
             </div>
           </div>
-        </Card>
+        </div>
       ) : (
-        <Card className="border-l-4 border-l-teal">
+        <div className="glass rounded-2xl p-5 border-teal/30 bg-teal/[0.06]">
           <div className="flex items-start gap-3">
-            <ShieldCheck className="w-5 h-5 text-teal shrink-0 mt-0.5" />
+            <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-teal/[0.12] shrink-0">
+              <ShieldCheck className="w-5 h-5 text-teal" />
+            </div>
             <div>
-              <h3 className="text-sm font-semibold text-teal">Fully Covered</h3>
+              <h3 className="text-lg font-semibold text-teal">Fully Covered</h3>
               <p className="text-sm text-muted-foreground mt-1">
                 Your current coverage meets or exceeds the recommended amount. Review annually as your
                 income and family situation changes.
               </p>
             </div>
           </div>
-        </Card>
+        </div>
       )}
 
       {/* Premium Estimate */}
       <Card>
         <div className="flex items-center gap-2 mb-4">
-          <Calculator className="w-5 h-5 text-navy" />
+          <div className="flex items-center justify-center w-9 h-9 rounded-xl accent-soft shrink-0">
+            <Calculator className="w-4 h-4 text-teal" />
+          </div>
           <CardTitle>Estimated Monthly Premium Ranges</CardTitle>
         </div>
         <p className="text-xs text-muted-foreground mb-4">
@@ -411,31 +463,33 @@ export default function InsurancePage() {
       </Card>
 
       {/* Important notes */}
-      <Card className="border-l-4 border-l-navy">
+      <div className="glass rounded-2xl p-5 border-navy/30 bg-navy/[0.05]">
         <div className="flex items-start gap-3">
-          <Info className="w-5 h-5 text-navy shrink-0 mt-0.5" />
+          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-navy/[0.12] shrink-0">
+            <Info className="w-5 h-5 text-navy" />
+          </div>
           <div>
-            <h3 className="text-sm font-semibold text-foreground">Important Considerations</h3>
+            <h3 className="text-lg font-semibold text-foreground">Important Considerations</h3>
             <ul className="text-sm text-muted-foreground mt-2 space-y-1.5">
               <li>
-                <strong>Employer coverage is not portable</strong> — Tesla&apos;s 2x salary benefit disappears if you leave. Own your own policy.
+                <strong className="text-foreground">Employer coverage is not portable</strong> — Tesla&apos;s 2x salary benefit disappears if you leave. Own your own policy.
               </li>
               <li>
-                <strong>Don&apos;t skip the spouse</strong> — Even if one spouse doesn&apos;t work, childcare, household management, and emotional support have real financial value.
+                <strong className="text-foreground">Don&apos;t skip the spouse</strong> — Even if one spouse doesn&apos;t work, childcare, household management, and emotional support have real financial value.
               </li>
               <li>
-                <strong>Get covered before baby arrives</strong> — Pregnancy can complicate or delay underwriting.
+                <strong className="text-foreground">Get covered before baby arrives</strong> — Pregnancy can complicate or delay underwriting.
               </li>
               <li>
-                <strong>Term vs. Whole Life</strong> — For most young families, term life is the best value. Invest the premium savings separately.
+                <strong className="text-foreground">Term vs. Whole Life</strong> — For most young families, term life is the best value. Invest the premium savings separately.
               </li>
               <li>
-                <strong>Review annually</strong> — As income grows and debts shrink, your coverage needs will change.
+                <strong className="text-foreground">Review annually</strong> — As income grows and debts shrink, your coverage needs will change.
               </li>
             </ul>
           </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

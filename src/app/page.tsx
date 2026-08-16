@@ -11,23 +11,25 @@ import {
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-sidebar text-white">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
       <header className="flex items-center justify-between px-6 py-4 max-w-6xl mx-auto">
-        <div className="flex items-center gap-2">
-          <Shield className="w-8 h-8 text-teal" />
-          <span className="text-xl font-bold">FamilyVault</span>
+        <div className="flex items-center gap-2.5">
+          <span className="w-9 h-9 rounded-xl accent-soft flex items-center justify-center">
+            <Shield className="w-5 h-5 text-teal" />
+          </span>
+          <span className="text-xl font-bold text-gradient tracking-tight">FamilyVault</span>
         </div>
         <div className="flex items-center gap-3">
           <Link
             href="/login"
-            className="px-4 py-2 text-sm font-medium text-white/80 hover:text-white transition"
+            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition"
           >
             Sign In
           </Link>
           <Link
             href="/signup"
-            className="px-4 py-2 text-sm font-medium bg-teal text-white rounded-lg hover:bg-teal-light transition"
+            className="px-4 py-2 text-sm font-semibold bg-teal text-[#08090D] rounded-lg hover:bg-teal-light glow-accent transition"
           >
             Get Started
           </Link>
@@ -35,29 +37,41 @@ export default function LandingPage() {
       </header>
 
       {/* Hero */}
-      <section className="px-6 py-20 max-w-4xl mx-auto text-center">
-        <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6">
+      <section className="px-6 py-24 max-w-4xl mx-auto text-center">
+        <div className="inline-flex items-center gap-2 accent-soft rounded-full px-3 py-1 text-xs font-medium text-teal mb-8">
+          <ShieldCheck className="w-3.5 h-3.5" />
+          Private &amp; encrypted by design
+        </div>
+        <h1 className="text-4xl md:text-6xl font-bold leading-[1.1] tracking-tight mb-6">
           Protect What Matters.
           <br />
-          <span className="text-teal">Build Your Legacy.</span>
+          <span className="text-gradient">Build Your Legacy.</span>
         </h1>
-        <p className="text-lg md:text-xl text-white/70 max-w-2xl mx-auto mb-10">
+        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
           Your family&apos;s single source of truth for estate planning,
           insurance coverage, and emergency preparedness. Everything your
           loved ones need, organized and secure.
         </p>
-        <Link
-          href="/signup"
-          className="inline-flex items-center gap-2 px-8 py-4 bg-teal text-white font-semibold rounded-xl hover:bg-teal-light transition text-lg"
-        >
-          Start Protecting Your Family
-          <ArrowRight className="w-5 h-5" />
-        </Link>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <Link
+            href="/signup"
+            className="inline-flex items-center gap-2 bg-teal text-[#08090D] font-semibold rounded-xl px-6 py-3 hover:bg-teal-light glow-accent transition text-lg"
+          >
+            Start Protecting Your Family
+            <ArrowRight className="w-5 h-5" />
+          </Link>
+          <Link
+            href="/login"
+            className="inline-flex items-center justify-center glass border border-border rounded-xl px-6 py-3 hover:bg-white/[0.05] transition text-lg font-medium"
+          >
+            Sign In
+          </Link>
+        </div>
       </section>
 
       {/* Features */}
       <section className="px-6 py-16 max-w-6xl mx-auto">
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-3 gap-6">
           {[
             {
               icon: FolderLock,
@@ -92,18 +106,20 @@ export default function LandingPage() {
           ].map((feature) => (
             <div
               key={feature.title}
-              className="bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 transition"
+              className="glass card-hover rounded-2xl p-5"
             >
-              <feature.icon className="w-10 h-10 text-teal mb-4" />
+              <span className="w-11 h-11 rounded-xl accent-soft flex items-center justify-center mb-4">
+                <feature.icon className="w-5 h-5 text-teal" />
+              </span>
               <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-              <p className="text-white/60 text-sm leading-relaxed">{feature.desc}</p>
+              <p className="text-muted-foreground text-sm leading-relaxed">{feature.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="px-6 py-8 text-center text-white/40 text-sm border-t border-white/10">
+      <footer className="px-6 py-8 text-center text-muted-foreground text-sm border-t border-border">
         <p>&copy; 2026 FamilyVault. Your data stays private and encrypted.</p>
       </footer>
     </div>

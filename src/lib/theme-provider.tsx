@@ -10,31 +10,34 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: "light",
+  theme: "dark",
   toggleTheme: () => {},
 });
 
+// Dark-first: the app defaults to dark. Light mode is opt-in via a `.light`
+// class on <html> (see globals.css). Only an explicit saved "light" preference
+// switches it.
+function applyTheme(theme: Theme) {
+  document.documentElement.classList.toggle("light", theme === "light");
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("light");
+  const [theme, setTheme] = useState<Theme>("dark");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     const saved = localStorage.getItem("fv-theme") as Theme | null;
-    if (saved) {
-      setTheme(saved);
-      document.documentElement.classList.toggle("dark", saved === "dark");
-    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setTheme("dark");
-      document.documentElement.classList.add("dark");
-    }
+    const initial: Theme = saved ?? "dark";
+    setTheme(initial);
+    applyTheme(initial);
   }, []);
 
   const toggleTheme = () => {
     const next = theme === "light" ? "dark" : "light";
     setTheme(next);
     localStorage.setItem("fv-theme", next);
-    document.documentElement.classList.toggle("dark", next === "dark");
+    applyTheme(next);
   };
 
   if (!mounted) {

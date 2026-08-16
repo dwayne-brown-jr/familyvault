@@ -54,34 +54,42 @@ export default function SettingsPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-          <Settings className="w-6 h-6" />
+        <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
+          <Settings className="w-7 h-7 text-teal" />
           Settings
         </h1>
-        <p className="text-muted mt-1">Manage your household and account</p>
+        <p className="text-muted-foreground text-sm mt-1">
+          Manage your household and account
+        </p>
       </div>
 
       {/* Household Info */}
-      <div className="bg-card rounded-xl border border-border p-6">
+      <div className="glass rounded-2xl p-5">
         <h2 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-4">
-          <Users className="w-5 h-5 text-teal" />
+          <div className="w-9 h-9 rounded-full accent-soft flex items-center justify-center">
+            <Users className="w-5 h-5 text-teal" />
+          </div>
           Household
         </h2>
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div>
-            <label className="text-sm text-muted">Household Name</label>
+            <label className="text-xs font-medium text-muted-foreground">
+              Household Name
+            </label>
             <p className="text-foreground font-medium">{household?.name || "My Family"}</p>
           </div>
 
           <div>
-            <label className="text-sm text-muted">Members</label>
-            <div className="mt-1 space-y-2">
+            <label className="text-xs font-medium text-muted-foreground">
+              Members
+            </label>
+            <div className="mt-2">
               {members.map((m) => (
                 <div
                   key={m.id}
-                  className="flex items-center gap-2 py-2 px-3 bg-surface rounded-lg"
+                  className="flex items-center gap-3 py-3 border-b border-border last:border-0"
                 >
-                  <div className="w-8 h-8 rounded-full bg-teal/20 flex items-center justify-center text-teal font-medium text-sm">
+                  <div className="w-9 h-9 rounded-full accent-soft flex items-center justify-center text-teal font-semibold text-sm">
                     {(m.display_name || "?")[0].toUpperCase()}
                   </div>
                   <span className="text-foreground">{m.display_name || "Unknown"}</span>
@@ -93,12 +101,14 @@ export default function SettingsPage() {
       </div>
 
       {/* Invite Member */}
-      <div className="bg-card rounded-xl border border-border p-6">
+      <div className="glass rounded-2xl p-5">
         <h2 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-4">
-          <Mail className="w-5 h-5 text-teal" />
+          <div className="w-9 h-9 rounded-full accent-soft flex items-center justify-center">
+            <Mail className="w-5 h-5 text-teal" />
+          </div>
           Invite a Family Member
         </h2>
-        <p className="text-sm text-muted mb-4">
+        <p className="text-sm text-muted-foreground mb-4">
           Send an invite link so your spouse or partner can join your household and see all the same data.
         </p>
 
@@ -108,54 +118,61 @@ export default function SettingsPage() {
             placeholder="Email address"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="flex-1 px-3 py-2 rounded-lg border border-border bg-surface text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-teal"
+            className="flex-1 px-3 py-2 rounded-lg bg-white/[0.04] border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
           />
           <button
             type="submit"
             disabled={sending || !email.trim()}
-            className="px-4 py-2 bg-teal text-white rounded-lg font-medium hover:bg-teal/90 transition disabled:opacity-50"
+            className="px-4 py-2 bg-teal text-[#08090D] rounded-lg font-medium hover:bg-teal-light transition disabled:opacity-50"
           >
             {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Invite"}
           </button>
         </form>
 
-        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-        {success && <p className="text-green-600 text-sm mt-2">{success}</p>}
+        {error && <p className="text-coral text-sm mt-2">{error}</p>}
+        {success && <p className="text-teal text-sm mt-2">{success}</p>}
 
         {/* Pending Invites */}
         {invites.length > 0 && (
           <div className="mt-6">
-            <h3 className="text-sm font-medium text-muted mb-2">Pending Invites</h3>
-            <div className="space-y-2">
+            <h3 className="text-xs font-medium text-muted-foreground mb-2">
+              Pending Invites
+            </h3>
+            <div>
               {invites.map((inv) => (
                 <div
                   key={inv.id}
-                  className="flex items-center justify-between py-2 px-3 bg-surface rounded-lg"
+                  className="flex items-center justify-between py-3 border-b border-border last:border-0"
                 >
-                  <div>
-                    <span className="text-foreground text-sm">{inv.email}</span>
-                    <span className="text-muted text-xs ml-2">
-                      expires {new Date(inv.expires_at).toLocaleDateString()}
-                    </span>
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full accent-soft flex items-center justify-center text-teal font-semibold text-sm shrink-0">
+                      {(inv.email || "?")[0].toUpperCase()}
+                    </div>
+                    <div>
+                      <span className="text-foreground text-sm">{inv.email}</span>
+                      <span className="text-muted-foreground text-xs ml-2">
+                        expires {new Date(inv.expires_at).toLocaleDateString()}
+                      </span>
+                    </div>
                   </div>
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => copyInviteLink(inv)}
-                      className="p-1.5 rounded hover:bg-surface-hover transition"
+                      className="p-1.5 rounded-lg hover:bg-white/[0.08] transition"
                       title="Copy invite link"
                     >
                       {copied === inv.id ? (
-                        <Check className="w-4 h-4 text-green-500" />
+                        <Check className="w-4 h-4 text-teal" />
                       ) : (
-                        <Copy className="w-4 h-4 text-muted" />
+                        <Copy className="w-4 h-4 text-muted-foreground" />
                       )}
                     </button>
                     <button
                       onClick={() => revokeInvite(inv.id)}
-                      className="p-1.5 rounded hover:bg-red-500/10 transition"
+                      className="p-1.5 rounded-lg text-coral hover:bg-coral/15 transition"
                       title="Revoke invite"
                     >
-                      <Trash2 className="w-4 h-4 text-red-500" />
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -166,10 +183,12 @@ export default function SettingsPage() {
       </div>
 
       {/* Account Info */}
-      <div className="bg-card rounded-xl border border-border p-6">
+      <div className="glass rounded-2xl p-5">
         <h2 className="text-lg font-semibold text-foreground mb-4">Account</h2>
         <div>
-          <label className="text-sm text-muted">Monthly Take-Home Income</label>
+          <label className="text-xs font-medium text-muted-foreground">
+            Monthly Take-Home Income
+          </label>
           <p className="text-foreground font-medium">
             ${monthlyIncome.toLocaleString()}
           </p>

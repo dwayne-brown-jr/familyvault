@@ -17,7 +17,7 @@ grant update (display_name, household_income, monthly_take_home) on public.profi
 drop policy if exists "Users can insert own profile" on public.profiles;  -- profiles are created by the signup trigger only
 drop policy if exists "Users can update own profile" on public.profiles;
 create policy "Users can update own profile" on public.profiles
-  for update using (auth.uid() = id) with check (auth.uid() = id);
+  for update to authenticated using (auth.uid() = id) with check (auth.uid() = id);
 
 -- Households: no free-floating creation from the browser (the signup trigger creates them).
 drop policy if exists "Users can create household" on public.households;
@@ -40,7 +40,7 @@ grant execute on function public.get_my_household_id() to authenticated;
 drop policy if exists "Users can view own profile" on public.profiles;
 drop policy if exists "Users can view household profiles" on public.profiles;
 create policy "Users can view household profiles" on public.profiles
-  for select using (auth.uid() = id or household_id = public.get_my_household_id());
+  for select to authenticated using (auth.uid() = id or household_id = public.get_my_household_id());
 
 
 create or replace function public.handle_new_user()

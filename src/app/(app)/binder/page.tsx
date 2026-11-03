@@ -2088,7 +2088,7 @@ function DigitalTab() {
             />
             <input
               type="text"
-              placeholder="Details"
+              placeholder='Where to find it, e.g. "See 1Password" (never the password itself)'
               value={newItem.details}
               onChange={(e) => setNewItem((p) => ({ ...p, details: e.target.value }))}
               className={INPUT_CLASS}
@@ -2151,7 +2151,7 @@ function DigitalTab() {
                         />
                         <input
                           type="text"
-                          placeholder="Details"
+                          placeholder='Where to find it, e.g. "See 1Password" (never the password itself)'
                           value={editValues.details || ""}
                           onChange={(e) => setEditValues((p) => ({ ...p, details: e.target.value }))}
                           className={INPUT_CLASS}

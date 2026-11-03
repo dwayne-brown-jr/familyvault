@@ -45,7 +45,7 @@ export default function InsurancePage() {
   // Shared calculation (identical to the Dashboard via @/lib/insurance)
   const calc = useMemo(() => computeInsurance(values), [values]);
 
-  const teslaEmployerCoverage = calc.employerCoverage;
+  const employerCoverage = calc.employerCoverage;
   const totalCurrentCoverage = calc.currentCoverage;
   const recommended = {
     incomeReplacement: calc.incomeReplacement,
@@ -100,9 +100,9 @@ export default function InsurancePage() {
   // Coverage sources
   const coverageSources = [
     {
-      label: "Tesla Employer (2x Salary)",
-      amount: teslaEmployerCoverage,
-      note: "Not portable if you leave Tesla",
+      label: "Employer (2x Salary)",
+      amount: employerCoverage,
+      note: "Not portable if you leave your employer",
       editable: false,
     },
     {
@@ -472,7 +472,7 @@ export default function InsurancePage() {
             <h3 className="text-lg font-semibold text-foreground">Important Considerations</h3>
             <ul className="text-sm text-muted-foreground mt-2 space-y-1.5">
               <li>
-                <strong className="text-foreground">Employer coverage is not portable</strong> — Tesla&apos;s 2x salary benefit disappears if you leave. Own your own policy.
+                <strong className="text-foreground">Employer coverage is not portable</strong> — Your employer&apos;s 2x salary benefit disappears if you leave. Own your own policy.
               </li>
               <li>
                 <strong className="text-foreground">Don&apos;t skip the spouse</strong> — Even if one spouse doesn&apos;t work, childcare, household management, and emotional support have real financial value.

@@ -315,7 +315,7 @@ export default function GuidePage() {
           Downloadable Resources
         </h2>
         <p className="text-sm text-foreground/70 mb-4">
-          These are the guides that inspired this app. They go deeper into the
+          This is the guide that inspired this app. It goes deeper into the
           &ldquo;why&rdquo; behind each section if you want to learn more.
         </p>
         <div className="grid sm:grid-cols-2 gap-4">
@@ -334,24 +334,6 @@ export default function GuidePage() {
               <p className="text-xs text-muted-foreground mt-1">
                 The original binder template with all 7 tabs. Great for
                 understanding what info to gather.
-              </p>
-            </div>
-          </a>
-          <a
-            href="/Family-Legacy-Playbook.pdf"
-            download
-            className="glass card-hover rounded-2xl p-5 flex items-start gap-3 group"
-          >
-            <div className="w-9 h-9 rounded-full accent-soft flex items-center justify-center shrink-0">
-              <FileDown className="w-5 h-5 text-navy" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-foreground group-hover:text-teal transition">
-                Family Legacy Playbook
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                The complete guide covering legal, insurance, financial, and
-                digital estate planning.
               </p>
             </div>
           </a>

@@ -35,29 +35,27 @@ function JoinContent() {
 
     async function checkInvite() {
       const supabase = createClient();
-      // Look up the invite
-      const { data: inv, error: err } = await supabase
-        .from("household_invites")
-        .select("*, households(name)")
-        .eq("token", token)
-        .is("accepted_at", null)
-        .single();
+      // Look up the invite on the server. The invitee isn't in the household yet,
+      // so they can't read household_invites directly.
+      const { data, error: err } = await supabase.rpc("get_household_invite", {
+        p_token: token,
+      });
+      const inv = Array.isArray(data) ? data[0] : null;
 
       if (err || !inv) {
         setStatus("invalid");
         return;
       }
 
-      // Check if expired
-      if (new Date(inv.expires_at) < new Date()) {
+      if (!inv.is_valid) {
         setStatus("invalid");
-        setError("This invite has expired.");
+        setError("This invite has expired or was already used.");
         return;
       }
 
       setInvite({
         email: inv.email,
-        household_name: (inv.households as { name: string })?.name || "Family",
+        household_name: inv.household_name || "Family",
       });
       setStatus("ready");
     }
@@ -73,49 +71,20 @@ function JoinContent() {
 
       if (!user) {
         // Not logged in — redirect to login with return URL
-        window.location.href = `/login?redirect=/join?token=${token}`;
+        window.location.href = `/login?redirect=${encodeURIComponent(`/join?token=${token}`)}`;
         return;
       }
 
-      // Get the invite
-      const { data: inv } = await supabase
-        .from("household_invites")
-        .select("*")
-        .eq("token", token)
-        .is("accepted_at", null)
-        .single();
+      // Joining happens on the server: it checks the token, expiry and that the
+      // signed-in email matches the invited email, then moves this user's data.
+      const { error: joinErr } = await supabase.rpc("accept_household_invite", {
+        p_token: token,
+      });
 
-      if (!inv) {
+      if (joinErr) {
         setStatus("error");
-        setError("Invite not found or already used.");
+        setError(joinErr.message || "Invite not found or already used.");
         return;
-      }
-
-      // Update user's profile to join the household
-      const { error: profileErr } = await supabase
-        .from("profiles")
-        .update({ household_id: inv.household_id })
-        .eq("id", user.id);
-
-      if (profileErr) throw profileErr;
-
-      // Mark invite as accepted
-      await supabase
-        .from("household_invites")
-        .update({ accepted_at: new Date().toISOString() })
-        .eq("id", inv.id);
-
-      // Update all existing data to the new household
-      const tables = [
-        "debts", "debt_payments", "net_worth_snapshots", "budget_categories",
-        "expenses", "contacts", "legal_documents", "financial_accounts",
-        "insurance_policies", "monthly_bills", "digital_access", "letter_of_intent", "action_items",
-      ];
-      for (const table of tables) {
-        await supabase
-          .from(table)
-          .update({ household_id: inv.household_id })
-          .eq("user_id", user.id);
       }
 
       setStatus("success");

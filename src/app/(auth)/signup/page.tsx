@@ -30,9 +30,18 @@ export default function SignupPage() {
         },
       });
       if (error) {
-        setError(error.message);
+        // The database rejects sign-ups for emails without a pending invite.
+        setError(
+          /database error|invite-only/i.test(error.message)
+            ? "FamilyVault is invite-only. Ask a household member to send you an invite, then use the link in it."
+            : error.message
+        );
       } else {
-        router.push("/dashboard");
+        const params = new URLSearchParams(window.location.search);
+        const next = params.get("redirect");
+        // Only same-site paths, never another domain.
+        const dest = next && next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+        router.push(dest);
         router.refresh();
       }
     } catch {
@@ -52,8 +61,8 @@ export default function SignupPage() {
             </span>
             <span className="text-2xl font-bold text-gradient tracking-tight">FamilyVault</span>
           </Link>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Create your vault</h1>
-          <p className="text-muted-foreground mt-1">Start protecting your family&apos;s future</p>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Accept your invite</h1>
+          <p className="text-muted-foreground mt-1">Sign-up is by invitation only. Use the email your invite was sent to.</p>
         </div>
 
         <form onSubmit={handleSignup} className="glass glow-accent rounded-2xl p-6 space-y-4">

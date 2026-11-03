@@ -25,7 +25,11 @@ export default function LoginPage() {
       if (error) {
         setError(error.message);
       } else {
-        router.push("/dashboard");
+        const params = new URLSearchParams(window.location.search);
+        const next = params.get("redirect");
+        // Only same-site paths, never another domain.
+        const dest = next && next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+        router.push(dest);
         router.refresh();
       }
     } catch {
@@ -98,7 +102,15 @@ export default function LoginPage() {
 
         <p className="text-center text-sm text-muted-foreground mt-6">
           Don&apos;t have an account?{" "}
-          <Link href="/signup" className="text-teal hover:text-teal-light font-medium transition">
+          <Link
+            href="/signup"
+            onClick={(e) => {
+              // Keep ?redirect= so an invited person lands back on their invite after signing up.
+              e.preventDefault();
+              window.location.href = "/signup" + window.location.search;
+            }}
+            className="text-teal hover:text-teal-light font-medium transition"
+          >
             Sign up
           </Link>
         </p>

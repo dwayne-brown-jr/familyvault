@@ -192,3 +192,16 @@ end;
 $$;
 revoke execute on function public.accept_household_invite(text) from public, anon;
 grant execute on function public.accept_household_invite(text) to authenticated;
+
+-- ---------- Logged-out visitors get no table access ----------
+-- Keep SELECT on profiles only so the keep-alive ping (anon key) still gets HTTP 200;
+-- RLS returns zero rows to anon.
+do $$
+declare r record;
+begin
+  for r in select tablename from pg_tables where schemaname = 'public' loop
+    execute format('revoke all on public.%I from anon', r.tablename);
+  end loop;
+end $$;
+grant select on public.profiles to anon;
+alter default privileges in schema public revoke all on tables from anon;
